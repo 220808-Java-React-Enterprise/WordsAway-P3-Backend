@@ -1,8 +1,8 @@
 package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
-import com.revature.wordsaway.models.Board;
-import com.revature.wordsaway.models.User;
+import com.revature.wordsaway.entities.Board;
+import com.revature.wordsaway.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

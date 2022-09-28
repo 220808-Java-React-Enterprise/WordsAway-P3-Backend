@@ -1,4 +1,4 @@
-package com.revature.wordsaway.models;
+package com.revature.wordsaway.entities;
 
 import org.springframework.stereotype.Component;
 

@@ -2,14 +2,11 @@ package com.revature.wordsaway.controllers;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
-import com.revature.wordsaway.models.User;
+import com.revature.wordsaway.entities.User;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
-import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 

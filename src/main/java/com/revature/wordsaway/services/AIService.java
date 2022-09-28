@@ -1,6 +1,6 @@
 package com.revature.wordsaway.services;
 
-import com.revature.wordsaway.models.Board;
+import com.revature.wordsaway.entities.Board;
 import org.springframework.stereotype.Service;
 import java.util.*;
 

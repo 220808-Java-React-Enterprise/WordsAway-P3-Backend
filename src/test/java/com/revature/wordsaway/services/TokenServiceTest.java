@@ -1,8 +1,7 @@
 package com.revature.wordsaway.services;
 
-import com.revature.wordsaway.models.User;
+import com.revature.wordsaway.entities.User;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import io.jsonwebtoken.JwtBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

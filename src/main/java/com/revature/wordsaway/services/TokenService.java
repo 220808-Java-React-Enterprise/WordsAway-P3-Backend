@@ -1,6 +1,6 @@
 package com.revature.wordsaway.services;
 
-import com.revature.wordsaway.models.User;
+import com.revature.wordsaway.entities.User;
 import com.revature.wordsaway.utils.JwtConfig;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
 import io.jsonwebtoken.*;
