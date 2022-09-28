@@ -15,6 +15,10 @@ public class User {
     private String salt;
     @Column(name = "email")
     private String email;
+
+    @Column(name = "avatar")
+    private int avatar;
+
     @Column(name = "elo", nullable = false)
     private float elo;
     @Column(name = "games_played", nullable = false)
@@ -29,11 +33,12 @@ public class User {
     private Set<User> friends = new HashSet<>();
 
     protected User(){}
-    public User(String username, String password, String salt, String email, float elo, int gamesPlayed, int gamesWon, boolean isCPU, Set<User> friends) {
+    public User(String username, String password, String salt, String email, int avatar, float elo, int gamesPlayed, int gamesWon, boolean isCPU, Set<User> friends) {
         this.username = username;
         this.password = password;
         this.salt = salt;
         this.email = email;
+        this.avatar = avatar;
         this.elo = elo;
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
@@ -55,6 +60,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public int getAvatar(){
+        return avatar;
     }
 
     public float getELO() {
