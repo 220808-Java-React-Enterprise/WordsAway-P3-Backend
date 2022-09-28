@@ -13,6 +13,7 @@ import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,10 +49,12 @@ public class UserService {
                 request.getPassword(),
                 request.getSalt(),
                 request.getEmail(),
+                0,
                 total != 0 ? sum / total : 1000,
                 0,
                 0,
-                false
+                false,
+                new HashSet<User>()
         );
         userRepository.save(user);
         return user;
