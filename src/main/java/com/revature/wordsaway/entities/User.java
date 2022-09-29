@@ -29,7 +29,7 @@ public class User {
     private Set<User> friends = new HashSet<>();
 
     protected User(){}
-    public User(String username, String password, String salt, String email, float elo, int gamesPlayed, int gamesWon, boolean isCPU, Set<User> friends) {
+    public User(String username, String password, String salt, String email, float elo, int gamesPlayed, int gamesWon, boolean isCPU) {
         this.username = username;
         this.password = password;
         this.salt = salt;
@@ -38,7 +38,6 @@ public class User {
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
         this.isCPU = isCPU;
-        this.friends = friends;
     }
 
     public String getUsername() {

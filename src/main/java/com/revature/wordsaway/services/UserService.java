@@ -12,9 +12,8 @@ import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+
+import java.util.*;
 
 @Service
 public class UserService {
@@ -23,8 +22,8 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository, BoardRepository boardRepository){
-        this.userRepository = userRepository;
-        this.boardRepository = boardRepository;
+        UserService.userRepository = userRepository;
+        UserService.boardRepository = boardRepository;
     }
 
     public static User register(NewUserRequest request){
