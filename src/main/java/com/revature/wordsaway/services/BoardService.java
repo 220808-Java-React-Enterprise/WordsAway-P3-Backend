@@ -2,8 +2,9 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class BoardService {
                 worms,
                 blankArr,
                 gameID,
-                isActive
+                isActive ? GameState.YOUR_TURN : GameState.OPPONENTS_TURN,
+                null
         );
         boardRepository.save(board);
         return board;

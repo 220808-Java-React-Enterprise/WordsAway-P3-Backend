@@ -1,8 +1,12 @@
-package com.revature.wordsaway.entities;
+package com.revature.wordsaway.models.entities;
 
+import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -27,9 +31,10 @@ public class Board implements Cloneable{
     private char[] letters;
     @Column(name = "game_id", nullable = false)
     private UUID gameID;
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
-
+    @Column(name = "gameState", nullable = false)
+    private GameState gameState;
+    @Column(name = "completed")
+    private Timestamp completed;
     @Transient
     private char[][] lettersRows;
     @Transient
@@ -37,7 +42,7 @@ public class Board implements Cloneable{
 
     protected Board(){}
 
-    public Board(UUID id, User user, char[] tray, int fireballs, char[] worms, char[] letters, UUID gameID, boolean isActive) {
+    public Board(UUID id, User user, char[] tray, int fireballs, char[] worms, char[] letters, UUID gameID, GameState gameState, Timestamp completed) {
         this.id = id;
         this.user = user;
         this.tray = tray;
@@ -45,7 +50,8 @@ public class Board implements Cloneable{
         this.worms = worms;
         this.letters = letters;
         this.gameID = gameID;
-        this.isActive = isActive;
+        this.gameState = gameState;
+        this.completed = completed;
     }
 
     @Override
@@ -106,8 +112,16 @@ public class Board implements Cloneable{
         return gameID;
     }
 
-    public boolean isActive() {
-        return isActive;
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public boolean isActive(){
+        return gameState == GameState.YOUR_TURN;
+    }
+
+    public Timestamp getCompleted(){
+        return completed;
     }
 
     public char[] getRow(int index){
@@ -145,7 +159,9 @@ public class Board implements Cloneable{
     }
 
     public void toggleActive() {
-        isActive = !isActive;
+        if (gameState == GameState.YOUR_TURN) gameState = GameState.OPPONENTS_TURN;
+        else if (gameState == GameState.OPPONENTS_TURN) gameState = GameState.YOUR_TURN;
+        else throw new RuntimeException("Can't toggle turns of game that has ended.");
     }
 
     @Override
@@ -158,7 +174,7 @@ public class Board implements Cloneable{
                 ", worms=" + Arrays.toString(worms) +
                 ", letters=" + Arrays.toString(letters) +
                 ", gameID=" + gameID +
-                ", isActive=" + isActive +
+                ", gameState=" + gameState +
                 '}';
     }
 }

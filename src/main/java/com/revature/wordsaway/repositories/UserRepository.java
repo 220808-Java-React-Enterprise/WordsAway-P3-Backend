@@ -1,6 +1,6 @@
 package com.revature.wordsaway.repositories;
 
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
