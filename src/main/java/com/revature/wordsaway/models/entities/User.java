@@ -1,4 +1,5 @@
-package com.revature.wordsaway.entities;
+package com.revature.wordsaway.models.entities;
+
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -15,6 +16,10 @@ public class User {
     private String salt;
     @Column(name = "email")
     private String email;
+
+    @Column(name = "avatar")
+    private int avatar;
+
     @Column(name = "elo", nullable = false)
     private float elo;
     @Column(name = "games_played", nullable = false)
@@ -25,19 +30,25 @@ public class User {
     private boolean isCPU;
 
     @ManyToMany
-    @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_username"))
+    @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_name"))
     private Set<User> friends = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "chats_jnc", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "chat"))
+    private Set<Chat> chats = new HashSet<>();
+
     protected User(){}
-    public User(String username, String password, String salt, String email, float elo, int gamesPlayed, int gamesWon, boolean isCPU) {
+    public User(String username, String password, String salt, String email, int avatar, float elo, int gamesPlayed, int gamesWon, boolean isCPU, Set<User> friends) {
         this.username = username;
         this.password = password;
         this.salt = salt;
         this.email = email;
+        this.avatar = avatar;
         this.elo = elo;
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
         this.isCPU = isCPU;
+        this.friends = friends;
     }
 
     public String getUsername() {
@@ -54,6 +65,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public int getAvatar(){
+        return avatar;
     }
 
     public float getELO() {

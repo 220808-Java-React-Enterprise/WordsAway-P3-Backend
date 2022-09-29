@@ -4,8 +4,8 @@ import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
 import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.UserRepository;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
@@ -13,8 +13,10 @@ import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -23,8 +25,8 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository, BoardRepository boardRepository){
-        UserService.userRepository = userRepository;
-        UserService.boardRepository = boardRepository;
+        this.userRepository = userRepository;
+        this.boardRepository = boardRepository;
     }
 
     public static User register(NewUserRequest request){
@@ -48,10 +50,12 @@ public class UserService {
                 request.getPassword(),
                 request.getSalt(),
                 request.getEmail(),
+                0,
                 total != 0 ? sum / total : 1000,
                 0,
                 0,
-                false
+                false,
+                new HashSet<User>()
         );
         userRepository.save(user);
         return user;

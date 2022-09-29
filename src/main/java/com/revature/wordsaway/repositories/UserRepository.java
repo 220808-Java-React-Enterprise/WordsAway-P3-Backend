@@ -2,6 +2,7 @@ package com.revature.wordsaway.repositories;
 
 import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -28,11 +29,6 @@ public interface UserRepository extends CrudRepository<User, String> {
     @Modifying
     @Query(value = "UPDATE users SET password = ?2 , email = ?3, elo = ?4, games_played = ?5, games_won = ?6 WHERE username = ?1", nativeQuery = true)
     void updateUser(String username, String password, String email, float elo, int gamesPlayed, int gamesWon);
-
-
-    //FRIEND QUERIES.
-    @Query(value = "SELECT * FROM users WHERE username = ?1", nativeQuery = true)
-    List<FindUserResponse> getAllFriends(String username);
 
 
 

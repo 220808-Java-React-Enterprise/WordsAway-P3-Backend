@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/WordsAway-P3-Backend.iml" filepath="$PROJECT_DIR$/.idea/WordsAway-P3-Backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../wordsaway-servlet.iml" filepath="$PROJECT_DIR$/../wordsaway-servlet.iml" />
     </modules>
   </component>
 </project>

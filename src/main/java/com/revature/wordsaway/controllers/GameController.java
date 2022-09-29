@@ -4,8 +4,8 @@ import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.requests.GameRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.AIService;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
@@ -173,19 +173,6 @@ public class GameController {
             opposingBoard.toggleActive();
             BoardService.update(board);
             BoardService.update(opposingBoard);
-        }
-    }
-
-    @CrossOrigin
-    @GetMapping(value = "/getOpponents", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<OpponentResponse> getOpponents(HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            User user = TokenService.extractRequesterDetails(req);
-            return UserService.getAllOpponents(user.getUsername());
-        }catch(NetworkException e){
-            resp.setStatus(e.getStatusCode());
-            System.out.println(e.getMessage());
-            return null;
         }
     }
     
