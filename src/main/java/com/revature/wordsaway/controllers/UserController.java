@@ -32,6 +32,22 @@ public class UserController {
     }
 
     @CrossOrigin
+
+    @GetMapping(value = "/getFriendsList", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody List<FindUserResponse> getFriendsList(HttpServletRequest req, HttpServletResponse resp) {
+
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            return UserService.getFriendsList(user.getUsername());
+        }catch (NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+    }
+
+
     @PostMapping(value = "/addFriend", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean addFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
@@ -59,6 +75,7 @@ public class UserController {
         }
     }
 
+
     @CrossOrigin
     @GetMapping(value = "/gameHistory", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody List<Board> getGameHistory (@RequestParam(required = false) String username, HttpServletRequest req, HttpServletResponse resp) {
@@ -71,4 +88,6 @@ public class UserController {
             return new ArrayList<Board>();
         }
     }
+
+
 }
