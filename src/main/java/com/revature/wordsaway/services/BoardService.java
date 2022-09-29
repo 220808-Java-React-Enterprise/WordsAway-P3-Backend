@@ -65,7 +65,9 @@ public class BoardService {
     }
 
     public static List<Board> getAllByUsername(String username) {
-        return boardRepository.findAllBoardsByUsername(username);
+        List<Board> boards = boardRepository.findAllBoardsByUsername(username);
+        if(boards == null || boards.size() == 0) throw new InvalidRequestException("No boards with by player with username " + username + " found.");
+        return boards;
     }
 
     public static Board getOpposingBoard(Board board) {
