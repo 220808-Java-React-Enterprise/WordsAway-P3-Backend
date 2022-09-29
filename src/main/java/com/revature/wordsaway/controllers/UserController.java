@@ -1,5 +1,4 @@
 package com.revature.wordsaway.controllers;
-import com.revature.wordsaway.dtos.requests.NewUserRequest;
 import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
@@ -21,10 +20,11 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/findUser", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody FindUserResponse finduser(@RequestParam(required = false) String username, HttpServletResponse req, HttpServletResponse resp) {
+    public @ResponseBody FindUserResponse findUser(@RequestParam String friend_name, HttpServletRequest req, HttpServletResponse resp) {
         try {
+            User user = TokenService.extractRequesterDetails(req);
             resp.setStatus(200);
-            return UserService.getFriendByUsername(username);
+            return UserService.getFriendByUsername(friend_name);
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
