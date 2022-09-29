@@ -20,7 +20,7 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/findUser", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody FindUserResponse finduser(@RequestParam String friend_name, HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody FindUserResponse findUser(@RequestParam String friend_name, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
             resp.setStatus(200);
