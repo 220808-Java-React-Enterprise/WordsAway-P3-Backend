@@ -65,6 +65,18 @@ public class UserService {
         userRepository.updateUser(user.getUsername(), user.getPassword(), user.getEmail(), user.getELO(), user.getGamesPlayed(), user.getGamesWon());
     }
 
+    public static void addFriend(User user, String friendName) {
+        User friend = getByUsername(friendName);
+        //TODO check if you are already friends.
+        userRepository.addFriend(user.getUsername(), friendName);
+    }
+
+    public static void removeFriend(User user, String friendName) {
+        User friend = getByUsername(friendName);
+        //TODO check if you are already friends.
+        userRepository.removeFriend(user.getUsername(), friendName);
+    }
+
     public static String login(LoginRequest request) throws AuthenticationException {
         User user = userRepository.findUserByUsername(request.getUsername());
         if (user != null && user.getPassword().equals(request.getPassword()))
@@ -98,10 +110,10 @@ public class UserService {
     }
 
     public static List<OpponentResponse> getAllOpponents(String username, boolean bots) {
-        return getAllOpponents(username, userRepository.finAllOtherUsers(username, bots));
+        return getAllOpponents(username, userRepository.findAllOtherUsers(username, bots));
     }
 
-    private static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
+    public static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
         List<OpponentResponse> results = new ArrayList<>();
         for(User opponent : users){
             List<Board> boards = boardRepository.findBoardsByTwoUsernames(username, opponent.getUsername());

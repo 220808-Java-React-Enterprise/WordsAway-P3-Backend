@@ -25,15 +25,26 @@ public interface UserRepository extends CrudRepository<User, String> {
     List<User> findAllOtherUsers(String username);
 
     @Query(value = "SELECT * FROM users WHERE username != ?1 AND is_cpu = ?2", nativeQuery = true)
-    List<User> finAllOtherUsers(String username, boolean isCPU);
+    List<User> findAllOtherUsers(String username, boolean isCPU);
 
     @Transactional
     @Modifying
     @Query(value = "UPDATE users SET password = ?2 , email = ?3, elo = ?4, games_played = ?5, games_won = ?6 WHERE username = ?1", nativeQuery = true)
     void updateUser(String username, String password, String email, float elo, int gamesPlayed, int gamesWon);
 
+
     //Friend QUERIES
     @Query(value = "SELECT friend_name FROM friends WHERE username = ?1", nativeQuery = true)
     List<String> getAllFriends(String username);
 
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT into friends (username, friend_name) VALUES (?1, ?2)", nativeQuery = true)
+    void addFriend(String username, String friendName);
+
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE from friends WHERE username = ?1 AND friend_name = ?2", nativeQuery = true)
+    void removeFriend(String username, String friendName);
 }

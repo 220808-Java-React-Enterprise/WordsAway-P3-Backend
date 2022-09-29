@@ -290,6 +290,18 @@ class UserServiceTest {
         verify(mockUser, times(1)).getGamesWon();
     }
 
+    @Test void test_addFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        userService.addFriend(mockUser, "username");
+        verify(mockUserRepo, times(1)).addFriend(any(), any());
+    }
+
+    @Test void test_removeFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        userService.removeFriend(mockUser, "username");
+        verify(mockUserRepo, times(1)).removeFriend(any(), any());
+    }
+
     @Test
     public void test_login_succeed(){
         LoginRequest request = mock(LoginRequest.class);
@@ -373,7 +385,8 @@ class UserServiceTest {
         assertEquals(opponents.get(0).getBoard_id(), uuid);
     }
 
-    @Test void test_getAllOpponents_NoOtherUsers_succeed(){
+    @Test
+    void test_getAllOpponents_NoOtherUsers_succeed(){
         when(mockUserRepo.findAllOtherUsers(any())).thenReturn(new ArrayList<>());
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
@@ -382,7 +395,8 @@ class UserServiceTest {
         assertEquals(opponents.size(), 0);
     }
 
-    @Test void test_getAllOpponents_NoBoards_succeed(){
+    @Test
+    void test_getAllOpponents_NoBoards_succeed(){
         when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockUser));
         when(mockUser.getUsername()).thenReturn("username");
         when(mockUser.getELO()).thenReturn(1000F);
@@ -395,6 +409,25 @@ class UserServiceTest {
         assertEquals(opponents.get(0).getUsername(), "username");
         assertEquals(opponents.get(0).getElo(), 1000F);
         assertNull(opponents.get(0).getBoard_id());
+    }
+
+    @Test void test_getAllOpponents_WithParameter_succeed(){
+        when(mockUserRepo.findAllOtherUsers("username", true)).thenReturn(Arrays.asList(mockUser));
+        when(mockUser.getUsername()).thenReturn("username");
+        when(mockUser.getELO()).thenReturn(1000F);
+        Board mockBoard = mock(Board.class);
+        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        when(mockBoard.getId()).thenReturn(uuid);
+        when(mockBoard.getUser()).thenReturn(mockUser);
+        when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
+        List<OpponentResponse> opponents = userService.getAllOpponents("username", true);
+        verify(mockUserRepo, times(1)).findAllOtherUsers("username", true);
+        verify(mockBoardRepo, times(1)).findBoardsByTwoUsernames(any(), any());
+        assertNotNull(opponents);
+        assertEquals(opponents.size(), 1);
+        assertEquals(opponents.get(0).getUsername(), "username");
+        assertEquals(opponents.get(0).getElo(), 1000F);
+        assertEquals(opponents.get(0).getBoard_id(), uuid);
     }
 
     //Delg added v2
