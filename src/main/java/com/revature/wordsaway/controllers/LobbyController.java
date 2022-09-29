@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,10 +17,13 @@ import java.util.List;
 public class LobbyController {
     @CrossOrigin
     @GetMapping(value = "/getOpponents", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<OpponentResponse> getOpponents(HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody List<OpponentResponse> getOpponents( @RequestParam(required = false) String type, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
-            return UserService.getAllOpponents(user.getUsername());
+            if(type == null) return UserService.getAllOpponents(user.getUsername());
+            else if(type.equalsIgnoreCase("bot")) return UserService.getAllOpponents(user.getUsername(), true);
+            else if (type.equalsIgnoreCase("human")) return UserService.getAllOpponents(user.getUsername(), false);
+            else return new ArrayList<>();
         }catch(NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
