@@ -1,5 +1,6 @@
 package com.revature.wordsaway.repositories;
 
+import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.models.entities.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
