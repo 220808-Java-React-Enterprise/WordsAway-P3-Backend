@@ -1,5 +1,6 @@
 package com.revature.wordsaway.models.entities;
 
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;

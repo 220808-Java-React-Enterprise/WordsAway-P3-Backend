@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
@@ -75,6 +76,15 @@ public class UserService {
         User user = userRepository.findUserByUsername(username);
         if(user == null) throw new InvalidRequestException("No user with username " + username + " found.");
         return user;
+    }
+
+    //Delg  created for v2
+    public static FindUserResponse getFriendByUsername(String username) {
+        User user = userRepository.findUserByUsername(username);
+        if(user == null) throw new InvalidRequestException("No user with username " + username + " found.");
+
+        return new FindUserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon());
+
     }
 
     public static List<User> getAll() {
