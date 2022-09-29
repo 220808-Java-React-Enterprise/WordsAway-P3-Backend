@@ -32,5 +32,8 @@ public interface UserRepository extends CrudRepository<User, String> {
     @Query(value = "UPDATE users SET password = ?2 , email = ?3, elo = ?4, games_played = ?5, games_won = ?6 WHERE username = ?1", nativeQuery = true)
     void updateUser(String username, String password, String email, float elo, int gamesPlayed, int gamesWon);
 
+    //Friend QUERIES
+    @Query(value = "SELECT friend_name FROM friends WHERE username = ?1", nativeQuery = true)
+    List<String> getAllFriends(String username);
 
 }

@@ -143,4 +143,19 @@ public class UserService {
             throw new ResourceConflictException("Email is already taken, please choose another.");
         }
     }
+
+    //Delg v2
+    public static List<FindUserResponse> getFriendsList(String username) {
+        List<String> friendsNames = userRepository.getAllFriends(username);
+        List<FindUserResponse> friendsList = new ArrayList<>();
+
+        for(String name: friendsNames) {
+            User friendAccount = getByUsername(name);
+            friendsList.add( new FindUserResponse(friendAccount.getUsername(), friendAccount.getELO(), friendAccount.getGamesPlayed(), friendAccount.getGamesWon()));
+
+        }
+
+        return friendsList;
+
+    }
 }
