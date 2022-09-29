@@ -23,12 +23,39 @@ public class UserController {
     public @ResponseBody FindUserResponse findUser(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
-            resp.setStatus(200);
             return UserService.getFriendByUsername(username);
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
             return null;
+        }
+    }
+
+    @CrossOrigin
+    @PostMapping(value = "/addFriend", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody boolean addFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            UserService.addFriend(user, username);
+            return true;
+        }catch (NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    @CrossOrigin
+    @PostMapping(value = "/removeFriend", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody boolean removeFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            UserService.removeFriend(user, username);
+            return true;
+        }catch (NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return false;
         }
     }
 
