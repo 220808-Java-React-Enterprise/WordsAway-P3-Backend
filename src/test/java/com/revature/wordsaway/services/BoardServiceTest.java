@@ -251,6 +251,27 @@ public class BoardServiceTest {
     }
 
     @Test
+    public void test_getAllByUsername_succeed(){
+        List<Board> mockBoards = new ArrayList<>();
+        mockBoards.add(mockBoard);
+        mockBoards.add(mockBoard);
+        when(mockRepo.findAllBoardsByUsername(any())).thenReturn(mockBoards);
+        List<Board> board = boardService.getAllByUsername("username");
+        assertNotNull(board);
+        verify(mockRepo, times(1)).findAllBoardsByUsername(any());
+    }
+
+    @Test
+    public void test_getAllByUsername_fail(){
+        when(mockRepo.findAllBoardsByUsername(any())).thenReturn(null);
+        InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class, () -> {
+            boardService.getAllByUsername("username");
+        });
+        verify(mockRepo, times(1)).findAllBoardsByUsername(any());
+        Assertions.assertEquals("No boards with by player with username username found.", thrown.getMessage());
+    }
+
+    @Test
     public void test_getOpposingBoard_succeed(){
         when(mockRepo.findOpposingBoardByIDAndGameID(any(), any())).thenReturn(mockBoard);
         when(mockBoard.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
