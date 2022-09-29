@@ -64,6 +64,10 @@ public class BoardService {
         return boards;
     }
 
+    public static List<Board> getAllByUsername(String username) {
+        return boardRepository.findAllBoardsByUsername(username);
+    }
+
     public static Board getOpposingBoard(Board board) {
         Board opposingBoard =  boardRepository.findOpposingBoardByIDAndGameID(board.getId(), board.getGameID());
         if(opposingBoard == null) throw new InvalidRequestException("No boards opposing " + board.getGameID() + " found.");

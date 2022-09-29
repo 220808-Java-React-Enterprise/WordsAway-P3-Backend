@@ -175,19 +175,6 @@ public class GameController {
             BoardService.update(opposingBoard);
         }
     }
-
-    @CrossOrigin
-    @GetMapping(value = "/getOpponents", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<OpponentResponse> getOpponents(HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            User user = TokenService.extractRequesterDetails(req);
-            return UserService.getAllOpponents(user.getUsername());
-        }catch(NetworkException e){
-            resp.setStatus(e.getStatusCode());
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
     
     @CrossOrigin
     @GetMapping(value = "/active")
