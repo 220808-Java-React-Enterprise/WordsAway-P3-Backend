@@ -24,7 +24,7 @@ public interface UserRepository extends CrudRepository<User, String> {
     List<User> findAllOtherUsers(String username);
 
     @Query(value = "SELECT * FROM users WHERE username != ?1 AND is_cpu = ?2", nativeQuery = true)
-    List<User> finAllOtherUsers(String username, boolean isCPU);
+    List<User> findAllOtherUsers(String username, boolean isCPU);
 
     @Transactional
     @Modifying

@@ -98,10 +98,10 @@ public class UserService {
     }
 
     public static List<OpponentResponse> getAllOpponents(String username, boolean bots) {
-        return getAllOpponents(username, userRepository.finAllOtherUsers(username, bots));
+        return getAllOpponents(username, userRepository.findAllOtherUsers(username, bots));
     }
 
-    private static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
+    public static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
         List<OpponentResponse> results = new ArrayList<>();
         for(User opponent : users){
             List<Board> boards = boardRepository.findBoardsByTwoUsernames(username, opponent.getUsername());
