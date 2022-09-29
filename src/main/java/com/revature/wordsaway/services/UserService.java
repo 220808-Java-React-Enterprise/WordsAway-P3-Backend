@@ -94,8 +94,16 @@ public class UserService {
     }
 
     public static List<OpponentResponse> getAllOpponents(String username) {
+        return getAllOpponents(username, userRepository.findAllOtherUsers(username));
+    }
+
+    public static List<OpponentResponse> getAllOpponents(String username, boolean bots) {
+        return getAllOpponents(username, userRepository.finAllOtherUsers(username, bots));
+    }
+
+    private static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
         List<OpponentResponse> results = new ArrayList<>();
-        for(User opponent : userRepository.findAllOtherUsers(username)){
+        for(User opponent : users){
             List<Board> boards = boardRepository.findBoardsByTwoUsernames(username, opponent.getUsername());
             UUID boardID;
             if(boards.size() > 0){
