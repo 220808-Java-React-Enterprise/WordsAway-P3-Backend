@@ -17,12 +17,12 @@ public class UserController {
     public @ResponseBody FindUserResponse finduser(@RequestParam(required = false) String username, HttpServletResponse req, HttpServletResponse resp) {
         try {
             resp.setStatus(200);
-            return UserService.getByUsername(username);
+            return UserService.getFriendByUsername(username);
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
-
             System.out.println(e.getMessage());
             //return e.getMessage();
+            return null;
         }
     }
 }

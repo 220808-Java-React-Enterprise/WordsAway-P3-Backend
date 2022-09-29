@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.entities.Board;
 import com.revature.wordsaway.entities.User;
@@ -393,5 +394,13 @@ class UserServiceTest {
         assertEquals(opponents.get(0).getUsername(), "username");
         assertEquals(opponents.get(0).getElo(), 1000F);
         assertNull(opponents.get(0).getBoard_id());
+    }
+
+    //Delg added v2
+    @Test void test_GetFriendByUserName_CorrectName_succeed(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        FindUserResponse friend = userService.getFriendByUsername("username");
+        verify(mockUserRepo, times(1)).findUserByUsername(any());
+        assertNotNull(friend);
     }
 }
