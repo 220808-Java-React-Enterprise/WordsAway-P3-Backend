@@ -20,11 +20,11 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/findUser", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody FindUserResponse finduser(HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody FindUserResponse finduser(@RequestParam String friend_name, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
             resp.setStatus(200);
-            return UserService.getFriendByUsername(user.getUsername());
+            return UserService.getFriendByUsername(friend_name);
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
