@@ -2,7 +2,7 @@ package com.revature.wordsaway.controllers;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;

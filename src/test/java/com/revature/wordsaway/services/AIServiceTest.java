@@ -1,8 +1,9 @@
 package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,8 @@ public class AIServiceTest {
     public void setupTest(){
         Arrays.fill(letters, '.');
         Arrays.fill(worms, '.');
-        newBoard = new Board(UUID.fromString("00000000-0000-0000-0000-000000000000"), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), true);
+        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null);
+
 
         mockRepo = mock(BoardRepository.class);
         boardService = new BoardService(mockRepo);
