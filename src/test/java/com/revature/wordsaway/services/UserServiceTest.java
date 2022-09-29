@@ -289,6 +289,18 @@ class UserServiceTest {
         verify(mockUser, times(1)).getGamesWon();
     }
 
+    @Test void test_addFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        userService.addFriend(mockUser, "username");
+        verify(mockUserRepo, times(1)).addFriend(any(), any());
+    }
+
+    @Test void test_removeFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        userService.removeFriend(mockUser, "username");
+        verify(mockUserRepo, times(1)).removeFriend(any(), any());
+    }
+
     @Test
     public void test_login_succeed(){
         LoginRequest request = mock(LoginRequest.class);
