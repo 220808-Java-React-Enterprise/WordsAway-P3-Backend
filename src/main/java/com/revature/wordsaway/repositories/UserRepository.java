@@ -1,7 +1,6 @@
 package com.revature.wordsaway.repositories;
 
 import com.revature.wordsaway.dtos.responses.FindUserResponse;
-import com.revature.wordsaway.entities.User;
 import com.revature.wordsaway.models.entities.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,8 +33,4 @@ public interface UserRepository extends CrudRepository<User, String> {
     void updateUser(String username, String password, String email, float elo, int gamesPlayed, int gamesWon);
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 64c394336470aa5b72d4bd87dad72b134254dfe9
 }
