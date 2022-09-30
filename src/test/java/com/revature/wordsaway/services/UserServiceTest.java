@@ -43,6 +43,7 @@ class UserServiceTest {
         tokenServiceMockedStatic = mockStatic(TokenService.class);
         tokenServiceMockedStatic.when(() -> TokenService.generateToken(any())).thenReturn("testtoken");
         mockUser = mock(User.class);
+
     }
 
     @AfterEach
@@ -435,5 +436,22 @@ class UserServiceTest {
         FindUserResponse friend = userService.getFriendByUsername("username");
         verify(mockUserRepo, times(1)).findUserByUsername(any());
         assertNotNull(friend);
+    }
+
+    @Test void test_GetFriendsList_CorrectUsername_succed(){
+        ArrayList<String> mockFriendNames = new ArrayList<String>();
+        mockFriendNames.add("Friend1");
+        mockFriendNames.add("Friend2");
+        when(mockUserRepo.getAllFriends(any())).thenReturn(mockFriendNames);
+
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        when(mockUser.getUsername()).thenReturn("name");
+        when(mockUser.getELO()).thenReturn(1.0f);
+        when(mockUser.getGamesPlayed()).thenReturn(1);
+        when(mockUser.getGamesWon()). thenReturn(1);
+
+        List<FindUserResponse> friendsList = userService.getFriendsList("username");
+        assertNotNull(friendsList);
+
     }
 }
