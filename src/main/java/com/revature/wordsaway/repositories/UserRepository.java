@@ -42,7 +42,6 @@ public interface UserRepository extends CrudRepository<User, String> {
     @Query(value = "INSERT into friends (username, friend_name) VALUES (?1, ?2)", nativeQuery = true)
     void addFriend(String username, String friendName);
 
-
     @Transactional
     @Modifying
     @Query(value = "DELETE from friends WHERE username = ?1 AND friend_name = ?2", nativeQuery = true)

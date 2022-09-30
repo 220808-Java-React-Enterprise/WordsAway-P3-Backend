@@ -88,6 +88,4 @@ public class UserController {
             return new ArrayList<Board>();
         }
     }
-
-
 }
