@@ -2,13 +2,18 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.entities.Board;
 import org.springframework.stereotype.Service;
+import sun.reflect.generics.tree.Tree;
+
+import java.io.LineNumberReader;
 import java.util.*;
 
 import static com.revature.wordsaway.utils.Constants.BOARD_SIZE;
+import static com.revature.wordsaway.utils.Constants.VALID_WORDS;
 
 // todo run bot while user is making move to negate wait time on bot
 @Service
 public class AIService {
+    public static int temp = 0;
     private static List<WordAndLocation> finalList;
     private static List<String> validWords;
     private static String existingLetters;
@@ -24,6 +29,14 @@ public class AIService {
     private static class WordAndLocation{
         private int location;
         private String word;
+
+        @Override
+        public String toString() {
+            return "WordAndLocation{" +
+                    "location=" + location +
+                    ", word='" + word + '\'' +
+                    '}';
+        }
     }
 
     public static Board start(long startTime, Board board){ // todo add level for bots
@@ -50,7 +63,9 @@ public class AIService {
             }
             // Get random answer and play it
             WordAndLocation wl = finalList.get(rand.nextInt(finalList.size()));
+            temp++;
             finalizeMove(wl, increment);
+            System.out.println(wl);
         }
         return board;
     }
@@ -73,10 +88,12 @@ public class AIService {
 
         int curr = start;
         int counter = 0;
+
+        //increment = 1; col = false; start = curr = 64;
         // Get a final list of all moves in give row or col
         while (counter < BOARD_SIZE - 2) {
             existingLetters = getExistingLetters(curr, increment);
-            validWords = getWordList(existingLetters, curr, increment);
+            validWords = getWordList(existingLetters);
             finalList.addAll(getFinalWordListAndLocation(validWords, curr, increment));
 
             while (isLoop(col, start, curr) && isLetter(curr) && letters[curr] != '*'){
@@ -97,7 +114,7 @@ public class AIService {
         int spacerCounter = 0, counter = increment == BOARD_SIZE ? start / BOARD_SIZE : start % BOARD_SIZE;
 
         // Loop until end of colum or row
-        for (int i = start; spacerCounter < tray.length && counter < BOARD_SIZE; i += increment){
+        for (int i = start; spacerCounter <= tray.length && counter < BOARD_SIZE; i += increment){
             // Check if we are at a '.'
             if (isLetter(i)) {
                 if (letters[i] != '*') {
@@ -107,34 +124,31 @@ public class AIService {
             }
             // If there is a value in sb then add a spacer to spacer
             else {
-                spacer.append("_");
+                if (spacerCounter < tray.length)
+                    spacer.append("_");
                 spacerCounter++;
             }
             counter++;
         }
+        sb.append(spacer);
         return sb.toString();
     }
 
-    private static List<String> getWordList(String pattern, int start, int increment) {
-        List<String> words = new ArrayList<>();
-        List<String> incomingWords;
+    private static List<String> getWordList(String existing) {
+        char[] tempTray;
+        List<String> incomingWords = new ArrayList<>();
+        int wordLength = existing.length();
 
-        int rowOrCol = increment == BOARD_SIZE ? start / BOARD_SIZE : start % BOARD_SIZE,
-            maxWordLength = tray.length - pattern.replaceAll("[A-Z]", "").length() + pattern.length(),
-            wordLength = Math.min(maxWordLength, BOARD_SIZE - rowOrCol);
+        while (wordLength > 2){
+            tempTray = (String.valueOf(tray) + existing.replace("_","")).toCharArray();
+            incomingWords.addAll(AnagramService.getAll(tempTray, wordLength, existing));
 
-        // Loop for all possible words in that given space
-        do {
-            incomingWords = AnagramService.getAllList(String.valueOf(tray), pattern, wordLength);
-            if (incomingWords != null)
-                words.addAll(incomingWords);
+            if (existing.lastIndexOf("_") == -1) break;
+            existing = existing.substring(0, existing.lastIndexOf("_"));
+            wordLength = existing.length();
+        }
 
-            if (pattern.lastIndexOf("_") == -1) break;
-            pattern = pattern.substring(0, pattern.lastIndexOf("_"));
-            wordLength = pattern.length();
-        } while (pattern.length() > 2);
-
-        return words;
+        return incomingWords;
     }
 
     private static List<WordAndLocation> getFinalWordListAndLocation(List<String> words, int start, int increment){
@@ -169,7 +183,7 @@ public class AIService {
                         sb.append(sb.length() != 0 ? letters[cw] : String.valueOf(c[index]) + letters[cw]);
 
                     // Validate word
-                    if (sb.length() > 0 && !AnagramService.isWord(sb.toString().toLowerCase())) break exit;
+                    if (sb.length() > 0 && !AnagramService.isWord(sb.toString())) break exit;
 
                     index++;
                 }

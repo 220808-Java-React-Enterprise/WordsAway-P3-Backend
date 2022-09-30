@@ -28,7 +28,7 @@ public class AnagramController {
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody String anagramAll(@Param("letters") String letters, HttpServletResponse resp){
         try{
-            return AnagramService.getAll(letters);
+            return "";//AnagramService.getAll(letters);
         } catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());

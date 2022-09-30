@@ -11,7 +11,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.revature.wordsaway.utils.Constants.*;
 
 @Service
 public class AnagramService {
@@ -24,88 +27,38 @@ public class AnagramService {
     }
 
     public static String getBest(String letters){
-        try {
-            return restTemplate.getForObject("http://www.anagramica.com/best/" + letters, String.class);
-        }catch (HttpClientErrorException e){
-            return "";
-        }
+        // TODO getBest
+        return null;
     }
 
-    public static String getAll(String letters){
-        try {
-            return restTemplate.getForObject("http://www.anagramica.com/all/" + letters, String.class);
-        }catch (HttpClientErrorException e){
-            return "";
-        }
-    }
-
-    @ExceptionHandler(value = {IOException.class, FailingHttpStatusCodeException.class})
-    public static boolean isWord(String letters) {
-        StringBuilder pattern = new StringBuilder();
-        setOptions();
-
-        for (char c : letters.toCharArray())
-            pattern.append("_");
-
-        String pageURL = "https://anagram-solver.io/words-for/" + letters.toLowerCase() + "/pattern/" + pattern + "/?dictionary=otcwl";
-
-        try {
-            // Make request
-            HtmlPage page = client.getPage(pageURL);
-
-            // Get all anagrams
-            List<HtmlElement> items = page.getByXPath("//div[@class='wordblock']/a");
-
-            for (HtmlElement item : items){
-                // Save to a list
-                String word = item.asNormalizedText();
-
-                if (word.matches(letters)) return true;
-            }
-        } catch (IOException | FailingHttpStatusCodeException e){
-            return false;
-        }
-        return false;
-    }
-
-    @ExceptionHandler(value = {IOException.class, FailingHttpStatusCodeException.class})
-    public static List<String> getAllList(String letters, String pattern, int wordLength){
+    public static List<String> getAll(char[] tray, int wordSize, String pattern){
         List<String> words = new ArrayList<>();
-        setOptions();
+        Arrays.sort(tray);
+        int trayIdx, start = START_POINT_BY_WORD_LENGTH.get(wordSize);
 
-        String pageURL = !pattern.equals("")
-                ? "https://anagram-solver.io/words-for/" + letters + "/pattern/" + pattern + "/?dictionary=otcwl"
-                : "https://anagram-solver.io/words-for/" + letters + "/pattern/___/?dictionary=otcwl";
+        char[] currWord;
+        for (int wordIdx = start; wordIdx < START_POINT_BY_WORD_LENGTH.get(wordSize + 1); wordIdx++) {
+            currWord = VALID_WORDS.get(wordIdx).toCharArray();
+            Arrays.sort(currWord);
 
-        try {
-            // Make request
-            HtmlPage page = client.getPage(pageURL);
+            inner: {
+                if (pattern.contains(VALID_WORDS.get(wordIdx))) break inner;
 
-            // Get all anagrams
-            List<HtmlElement> items = page.getByXPath("//div[@class='wordblock']/a");
-
-            for (HtmlElement item : items){
-                // Save to a list
-                String word = item.asNormalizedText().toUpperCase();
-
-                if (word.length() == 2) break;
-
-                // Check if it's the pattern
-                if (!word.equals(pattern.replace("_", "")))
-                    // Skip if length of word is greater than what we want
-                    if (word.length() <= wordLength)
-                        words.add(word);
+                trayIdx = 0;
+                for (int letterIdx = 0; letterIdx < currWord.length;){
+                    if (trayIdx == tray.length || tray[trayIdx] > currWord[letterIdx]) break inner;
+                    else if (tray[trayIdx] == currWord[letterIdx]) letterIdx++;
+                    trayIdx++;
+                }
+                words.add(VALID_WORDS.get(wordIdx));
             }
-        } catch (IOException | FailingHttpStatusCodeException e){
-            return null;
         }
         return words;
     }
 
-    private static void setOptions() {
-        try{
-            client.getOptions().setCssEnabled(false);
-            client.getOptions().setJavaScriptEnabled(false);
-        } catch (NullPointerException ignored){}
+    public static boolean isWord(String letters){
+        for (int i = START_POINT_BY_WORD_LENGTH.get(letters.length()); i < START_POINT_BY_WORD_LENGTH.get(letters.length() + 1); i++)
+            if (VALID_WORDS.get(i).equals(letters)) return true;
+        return false;
     }
 }
