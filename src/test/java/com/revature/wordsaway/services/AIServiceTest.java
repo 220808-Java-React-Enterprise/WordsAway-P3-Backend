@@ -32,15 +32,21 @@ public class AIServiceTest {
     public void setupTest(){
         Arrays.fill(letters, '.');
         Arrays.fill(worms, '.');
+        tray[0] = 'A';
+        tray[1] = 'U';
+        tray[2] = 'P';
+        tray[3] = 'E';
+        tray[4] = 'R';
+        tray[5] = 'H';
+        tray[6] = 'N';
+
         newBoard = new Board(UUID.fromString("00000000-0000-0000-0000-000000000000"), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), true);
 
         mockRepo = mock(BoardRepository.class);
         boardService = new BoardService(mockRepo);
 
         mockBoard = mock(Board.class);
-        when(mockBoard.getLetters()).thenReturn(letters);
-        when(mockBoard.getWorms()).thenReturn(worms);
-
+        when(mockBoard.getTray()).thenReturn(tray);
         request = mock(BoardRequest.class);
 
         aiService = new AIService();
@@ -99,5 +105,93 @@ public class AIServiceTest {
                 '.', '.', 'I', '.', 'A', 'X', 'E', '.', 'I', 'F', 'F', '.', '.', '.', '.', '.',
                 '.', '.', 'L', '.', 'G', '.', 'S', '.', '.', '.', '.', '.', '.', '.', '.', '.'
         });
+    }
+
+    @Test
+    public void testStart_firstMove(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
+
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
+
+        when(request.getLayout()).thenReturn(newBoard.getLetters());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBlankBoard());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
+
+        boardService.validateMove(request);
+
+        staticMock.close();
+    }
+
+    @Test
+    public void testStart_twentyMovesIn(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
+        newBoard.setLetters(setupBoardTwentyMovesIn());
+
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
+
+        when(request.getLayout()).thenReturn(newBoard.getLetters());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
+
+        boardService.validateMove(request);
+
+        staticMock.close();
+    }
+
+    @Test
+    public void testStart_forceFailToFindWord(){
+        newBoard.setTray(new char[7]);
+        newBoard.setLetters(setupBoardTwentyMovesIn());
+
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
+    }
+
+    @Test
+    public void testStart_forceFailToFindWord_shootFireBall(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
+
+        newBoard.setLetters(setupBoardTwentyMovesIn());
+        newBoard.addFireballs(3);
+
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
+
+        when(request.getLayout()).thenReturn(newBoard.getLetters());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
+
+        boardService.validateMove(request);
+
+        staticMock.close();
+    }
+
+    @Test
+    public void testStart_forceFireBall() {
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
+
+        newBoard.setLetters(setupBlankBoard());
+        newBoard.addFireballs(3);
+
+        aiService.setRandomSeed(3);
+        aiService.start(System.currentTimeMillis(), newBoard);
+
+        when(request.getLayout()).thenReturn(newBoard.getLetters());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBlankBoard());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
+
+        boardService.validateMove(request);
+
+        staticMock.close();
     }
 }

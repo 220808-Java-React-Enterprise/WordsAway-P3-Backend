@@ -16,21 +16,40 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AnagramServiceTest {
-
-    private AnagramService anagramService;
-    private WebClient mockClient;
-    private RestTemplate mockRestTemplate;
+    private static AnagramService anagramService;
 
     @BeforeEach
     public void setup(){
-        mockRestTemplate = mock(RestTemplate.class);
-        mockClient = mock(WebClient.class);
-        anagramService = new AnagramService(mockRestTemplate, mockClient);
+        anagramService = new AnagramService();
     }
 
-    @AfterEach
-    public void setdown(){
-        anagramService = null;
-        mockRestTemplate = null;
+    @Test
+    public void testGetAll_succeed(){
+        char[] tray = new char[] {'U','G','E','B','P','D','X'};
+        String pattern = "_______";
+
+        while (pattern.length() > 1){
+            List<String> getAllList = anagramService.getAll(tray, pattern);
+            System.out.println(getAllList);
+            pattern = pattern.substring(0, pattern.lastIndexOf("_"));
+        }
+    }
+
+    @Test
+    public void isWord_succeed(){
+        String letters = "healing";
+
+        boolean flag = anagramService.isWord(letters);
+
+        assertTrue(flag);
+    }
+
+    @Test
+    public void isWord_fail(){
+        String letters = "henvkj";
+
+        boolean flag = anagramService.isWord(letters);
+
+        assertFalse(flag);
     }
 }

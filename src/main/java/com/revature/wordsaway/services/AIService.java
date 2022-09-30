@@ -29,19 +29,11 @@ public class AIService {
     private static class WordAndLocation{
         private int location;
         private String word;
-
-        @Override
-        public String toString() {
-            return "WordAndLocation{" +
-                    "location=" + location +
-                    ", word='" + word + '\'' +
-                    '}';
-        }
     }
 
     public static Board start(long startTime, Board board){ // todo add level for bots
         // If bot has taken longer than 20 seconds leave
-        if (System.currentTimeMillis() - startTime > 20000) return board;
+        if (System.currentTimeMillis() - startTime > 10000) return board;
         finalList = new ArrayList<>();
         AIService.board = board;
         letters = board.getLetters();
@@ -137,15 +129,13 @@ public class AIService {
     private static List<String> getWordList(String existing) {
         char[] tempTray;
         List<String> incomingWords = new ArrayList<>();
-        int wordLength = existing.length();
 
-        while (wordLength > 2){
+        for (int i = existing.length(); i > 2; i = existing.length()){
             tempTray = (String.valueOf(tray) + existing.replace("_","")).toCharArray();
-            incomingWords.addAll(AnagramService.getAll(tempTray, wordLength, existing));
+            incomingWords.addAll(AnagramService.getAll(tempTray, existing));
 
             if (existing.lastIndexOf("_") == -1) break;
             existing = existing.substring(0, existing.lastIndexOf("_"));
-            wordLength = existing.length();
         }
 
         return incomingWords;
