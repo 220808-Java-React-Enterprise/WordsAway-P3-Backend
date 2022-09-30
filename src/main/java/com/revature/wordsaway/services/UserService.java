@@ -10,6 +10,7 @@ import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.UserRepository;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
+import com.revature.wordsaway.utils.customExceptions.NotFoundException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -200,4 +201,37 @@ public class UserService {
         }
         return friendsList;
     }
+
+    public static List<UserResponse> getTopTenByElo() {
+        List<User> userList = userRepository.getTopTenInElo();
+        List<UserResponse> topTenList = new ArrayList<>();
+
+        for(User user: userList){
+            topTenList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
+        }
+
+        return topTenList;
+    }
+
+    public static List<UserResponse> getRankingsByELO() {
+
+        List<User> userList = userRepository.getAllOrderByElo();
+        List<UserResponse> rankingsList = new ArrayList<>();
+
+        for(User user: userList){
+            rankingsList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
+        }
+
+        return rankingsList;
+    }
+
+    public static int getRankByElo(String username, List<UserResponse> rankingList) {
+
+        for(UserResponse user: rankingList){
+            if(user.getUsername().equals(username)){ return rankingList.indexOf(user); }
+        }
+
+        throw new NotFoundException("Username not found in the rankings list. Please refresh and try again. If problem persists please contact us.");
+    }
+
 }

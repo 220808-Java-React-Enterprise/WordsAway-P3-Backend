@@ -52,6 +52,7 @@ public class UserController {
 
     }
 
+
     @PostMapping(value = "/addFriend", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean addFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
@@ -109,5 +110,21 @@ public class UserController {
             System.out.println(e.getMessage());
             return new ArrayList<Board>();
         }
+    }
+
+
+    @CrossOrigin
+    @GetMapping(value = "/getRankElo", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody Integer getRankByElo(@RequestParam(required = false) String username, HttpServletRequest req, HttpServletResponse resp){
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            if(username == null) { username = user.getUsername(); }
+            return UserService.getRankByElo(username, UserService.getRankingsByELO());
+        }catch(NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return 0;
+        }
+
     }
 }
