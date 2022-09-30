@@ -299,14 +299,14 @@ public class BoardServiceTest {
         // total - 17
         int countShipLength = 0, counter = 0;
         for (char letter : move){
-            if (String.valueOf(letter).matches("[0-5]"))
+            if (letter != '.')
                 countShipLength++;
 
-//            if (counter % BOARD_SIZE < BOARD_SIZE - 1) System.out.print(letter + ", ");
-//            else System.out.println(letter);
-//            counter++;
+            if (counter % BOARD_SIZE < BOARD_SIZE - 1) System.out.print(letter + ", ");
+            else System.out.println(letter);
+            counter++;
         }
-        //System.out.println();
+        System.out.println();
 
         assertEquals(17, countShipLength);
     }

@@ -93,7 +93,7 @@ public class BoardService {
                 } else {
                     if (oppLetters[i] == '*') worms[i] = '&';
                     else if (oppLetters[i] == '.') worms[i] = '!';
-                    else worms[i] = Character.toLowerCase(oppLetters[i]);
+                    else worms[i] = 'X';
                 }
             }
         }
@@ -111,29 +111,55 @@ public class BoardService {
         );
     }
 
+    private static char[] findDestroyedWorms(char[] worms){
+        return null;
+    }
+
     public static void setWorms(char[] worms) {
-        //TODO convert worm symbols into heads:→←↑↓ middles:-| tails:↦↤↥↧
         Random rand = new Random(System.currentTimeMillis());
-        char[] wormLetter = new char[] { '1', '2', '3', '4', '5' };
+        char[] wormHeads = new char[] {'↑','↓','→','←'};
+        char[] wormBody = new char[] {'-','|'};
+        char[] wormTails = new char[] {'↧','↥','↤','↦'};
         int[] wormArr = new int[] { 5, 4, 3, 3, 2 };
-        boolean col, flag;
-        int start, curr, end, increment;
+        boolean col, flag, head, body, tail;
+        int start, curr, end, increment, counter;
 
         for (int i = 0; i < wormArr.length;) {
             // Get a direction for the ship
             col = rand.nextInt(BOARD_SIZE + BOARD_SIZE) % 2 == 0;
+            // Start head or tail
+            head = rand.nextInt(100) % 2 == 0;
+            tail = !head;
+            body = false;
             // Set the increment
             increment = col ? BOARD_SIZE : 1;
             // Get start and end of worm
             curr = start = rand.nextInt(BOARD_SIZE * BOARD_SIZE);
             end = start + wormArr[i] * increment;
 
+            counter = 1;
             // Check if you can get to end
             if (col ? end < BOARD_SIZE * BOARD_SIZE : start / BOARD_SIZE == end / BOARD_SIZE){
                 flag = true;
                 while (flag ? curr < end : curr >= start) {
-                    if (worms[curr] == '.')
-                        worms[curr] = wormLetter[i];
+                    if (worms[curr] == '.') {
+                        if (body)
+                            worms[curr] = col ? wormBody[1] : wormBody[0];
+                        else if (head) {
+                            if (col) worms[curr] = counter == 1 ? wormHeads[0] : wormHeads[1];
+                            else worms[curr] = counter == 1 ? wormHeads[3] : wormHeads[2];
+                            tail = true;
+                            head = false;
+                        }
+                        else if (tail) {
+                            if (col) worms[curr] = counter == 1 ? wormTails[1] : wormTails[0];
+                            else worms[curr] = counter == 1 ? wormTails[2] : wormTails[3];
+                            head = true;
+                            tail = false;
+                        }
+                        counter++;
+                        body = counter != wormArr[i];
+                    }
                     else {
                         if (!flag) worms[curr] = '.';
                         flag = false;
@@ -151,6 +177,7 @@ public class BoardService {
     }
 
     private static char getRandomChar() {
+        // TODO update
         double[] weights = new double[]{0.03d, 0.05d, 0.08d, 0.12d, 0.16d, 0.18d, 0.18d, 0.18d};
         String[] charSets = new String[]{"G", "JKQXZ", "O", "E", "DLSU", "AI", "NRT", "BCFHMPVWY"};
         int counter = 0;
@@ -231,7 +258,7 @@ public class BoardService {
             fireballs += word1.length - 1;
             char[] word2 = findConnectedWord(newLetters, changeSpots.get(0), false, true);
             fireballs += word2.length - 1;
-            if (!isWord(word1) && !isWord(word2))
+            if (!AnagramService.isWord(String.valueOf(word1)) && !AnagramService.isWord(String.valueOf(word2)))
                 throw new InvalidRequestException("Invalid Move. Placed tiles do not form valid word.");
             oldBoard.addFireballs(fireballs);
             return oldBoard;
@@ -247,12 +274,12 @@ public class BoardService {
         }
         char[] word = findConnectedWord(newLetters, changeSpots.get(0), checkRow, checkColumn);
         fireballs += word.length - changeSpots.size();
-        if(!isWord(word))
+        if(!AnagramService.isWord(String.valueOf(word)))
             throw new InvalidRequestException("Invalid Move. Placed tiles do not form valid word.");
         for(ChangeSpot spot : changeSpots){
             word = findConnectedWord(newLetters, spot, !checkRow, !checkColumn);
             fireballs += word.length - 1;
-            if(word.length > 1 && !isWord(word))
+            if(word.length > 1 && !AnagramService.isWord(String.valueOf(word)))
                 throw new InvalidRequestException("Invalid Move. Placed tiles do not form valid word.");
         }
 
@@ -320,12 +347,6 @@ public class BoardService {
         throw new IllegalArgumentException("Either checkRow or checkColumn must be true.");
     }
 
-    private static boolean isWord(char[] rowOrColumn){
-        String word = new String(rowOrColumn);
-        if(!word.matches("^[A-Z]+$")) throw new InvalidRequestException("Invalid Move. Illegal characters placed on board.");
-        return AnagramService.isWord(word.toLowerCase());
-    }
-
     public static boolean[] getChecked(char[] letters){
         boolean[] hits = new boolean[BOARD_SIZE * BOARD_SIZE];
         for (int i = 0; i < hits.length; i++) {
@@ -381,7 +402,7 @@ public class BoardService {
         if (i + BOARD_SIZE < BOARD_SIZE * BOARD_SIZE) hits[i + BOARD_SIZE] = true;
     }
 
-    public static boolean gameOver(UUID id){
+    public static boolean gameOver(UUID id) {
         int hitCounter = 0;
         Board board = getByID(id);
         char[] worms = getOpposingBoard(board).getWorms();
