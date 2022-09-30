@@ -34,7 +34,6 @@ public class UserController {
     }
 
     @CrossOrigin
-
     @GetMapping(value = "/getFriendsList", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody Map<String, List<UserResponse>> getFriendsList(HttpServletRequest req, HttpServletResponse resp) {
         try {

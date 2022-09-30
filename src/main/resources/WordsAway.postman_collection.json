@@ -159,7 +159,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\":\"tahg3\",\n    \"password\":\"830c6617a02119b110aaf6e81a540048e884fd5be65cba491017ae64f750174beb64d063d461cd6ba0a75138b62e2a5a60b0bb897aa8511958e354c1aff385fd\"\n}",
+					"raw": "{\n    \"username\":\"koukaakiva\",\n    \"password\":\"fnord\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -838,6 +838,35 @@
 			"response": []
 		},
 		{
+			"name": "Add Friend 2",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authkey}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/addFriend?username=koukaakiva",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"addFriend"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "koukaakiva"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Remove Friend",
 			"request": {
 				"method": "POST",
@@ -860,6 +889,58 @@
 						{
 							"key": "username",
 							"value": "Easy-Bot"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Friends List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authkey}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/getFriendsList",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"getFriendsList"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Friend Request",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authkey}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/acceptFriendRequest?username=christhewizard",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"acceptFriendRequest"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "christhewizard"
 						}
 					]
 				}
