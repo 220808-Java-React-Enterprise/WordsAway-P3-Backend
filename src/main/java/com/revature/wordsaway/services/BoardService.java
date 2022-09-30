@@ -74,6 +74,7 @@ public class BoardService {
         char[] letters = myBoard.getLetters();
         char[] oppLetters = oppBoard.getLetters();
         char[] worms = myBoard.getWorms();
+        char[] originalWorms = worms.clone();
         char[] oppWorms = oppBoard.getWorms();
         boolean[] checked = getChecked(letters);
         boolean[] oppChecked = getChecked(oppLetters);
@@ -93,10 +94,11 @@ public class BoardService {
                 } else {
                     if (oppLetters[i] == '*') worms[i] = '&';
                     else if (oppLetters[i] == '.') worms[i] = '!';
-                    else worms[i] = 'X';
+                    else worms[i] = Character.toLowerCase(oppLetters[i]);
                 }
             }
         }
+        findDestroyedWorms(worms, originalWorms);
         String winner = null;
         if(gameOver(myBoard.getId())) winner = myBoard.getUser().getUsername();
         if(gameOver(oppBoard.getId())) winner = oppBoard.getUser().getUsername();
@@ -111,8 +113,35 @@ public class BoardService {
         );
     }
 
-    private static char[] findDestroyedWorms(char[] worms){
-        return null;
+    public static void findDestroyedWorms(char[] hitWorms, char[] originalWorms) {
+        char[] hitWormsClone = hitWorms.clone();
+        int increment, curr;
+        boolean flag, hit, startMarker, endMarker;
+
+        for (int i = 0; i < hitWorms.length; i++){
+            curr = i;
+            hit = String.valueOf(hitWorms[curr]).matches("[A-Z]");
+            startMarker = String.valueOf(originalWorms[curr]).matches("[↑↥←↤]");
+            endMarker = String.valueOf(originalWorms[curr]).matches("[↓↧→↦]");
+
+            if (hit && startMarker) {
+                increment = originalWorms[i] == '↑' || originalWorms[i] == '↥' ? BOARD_SIZE : 1;
+
+                flag = true;
+                while (flag || curr >= i) {
+                    if (hit) {
+                        hitWorms[curr] = '#';
+                        if (endMarker) break;
+                    } else {
+                        if (!flag) hitWorms[curr] = hitWormsClone[curr];
+                        flag = false;
+                    }
+                    curr += flag ? increment : increment * -1;
+                    hit = String.valueOf(hitWorms[curr]).matches("[A-Z]");
+                    endMarker = String.valueOf(originalWorms[curr]).matches("[↓↧→↦]");
+                }
+            }
+        }
     }
 
     public static void setWorms(char[] worms) {
@@ -177,7 +206,7 @@ public class BoardService {
     }
 
     private static char getRandomChar() {
-        // TODO update
+        // TODO update weights
         double[] weights = new double[]{0.03d, 0.05d, 0.08d, 0.12d, 0.16d, 0.18d, 0.18d, 0.18d};
         String[] charSets = new String[]{"G", "JKQXZ", "O", "E", "DLSU", "AI", "NRT", "BCFHMPVWY"};
         int counter = 0;
