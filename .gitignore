@@ -24,7 +24,7 @@
 hs_err_pid*
 
 *out/
-*.idea/
+*.idea/*
 *.properties
 *.iml
 *target/

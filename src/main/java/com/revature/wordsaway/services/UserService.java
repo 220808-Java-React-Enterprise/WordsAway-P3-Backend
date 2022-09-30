@@ -2,7 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
-import com.revature.wordsaway.dtos.responses.FindUserResponse;
+import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
@@ -14,10 +14,8 @@ import com.revature.wordsaway.utils.customExceptions.NotFoundException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+
+import java.util.*;
 
 @Service
 public class UserService {
@@ -66,16 +64,18 @@ public class UserService {
         userRepository.updateUser(user.getUsername(), user.getPassword(), user.getEmail(), user.getELO(), user.getGamesPlayed(), user.getGamesWon());
     }
 
-    public static void addFriend(User user, String friendName) {
-        User friend = getByUsername(friendName);
-        //TODO check if you are already friends.
-        userRepository.addFriend(user.getUsername(), friendName);
+    public static void addFriend(String username, String friendName) {
+        getByUsername(friendName); //Checks to make sure friend exists
+        if(userRepository.findAllFriends(username).contains(friendName))
+            throw new InvalidRequestException("You can not add a friend who is already in your friend list.");
+        userRepository.addFriend(username, friendName);
     }
 
-    public static void removeFriend(User user, String friendName) {
-        User friend = getByUsername(friendName);
-        //TODO check if you are already friends.
-        userRepository.removeFriend(user.getUsername(), friendName);
+    public static void removeFriend(String username, String friendName) {
+        getByUsername(friendName); //Checks to make sure friend exists
+        if(!userRepository.findAllFriends(username).contains(friendName))
+            throw new InvalidRequestException("You can not remove a friend who is not in your friend list.");
+        userRepository.removeFriend(username, friendName);
     }
 
     public static String login(LoginRequest request) throws AuthenticationException {
@@ -92,11 +92,11 @@ public class UserService {
     }
 
     //Delg  created for v2
-    public static FindUserResponse getFriendByUsername(String username) {
+    public static UserResponse getFriendByUsername(String username) {
         User user = userRepository.findUserByUsername(username);
         if(user == null) throw new InvalidRequestException("No user with username " + username + " found.");
 
-        return new FindUserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon());
+        return new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar());
 
     }
 
@@ -158,46 +158,76 @@ public class UserService {
     }
 
     //Delg v2
-    public static List<FindUserResponse> getFriendsList(String username) {
-        List<String> friendsNames = userRepository.getAllFriends(username);
-        List<FindUserResponse> friendsList = new ArrayList<>();
-
-        for(String name: friendsNames) {
+    public static Map<String, List<UserResponse>> getFriendsList(String username) {
+        Map<String, List<UserResponse>> friendsList = new HashMap<>();
+        friendsList.put("friends",  new ArrayList<>());
+        friendsList.put("incomingRequests",  new ArrayList<>());
+        friendsList.put("outgoingRequests",  new ArrayList<>());
+        List<String> myFriends = userRepository.findAllFriends(username);
+        List<String> peopleWhoFriendMe = userRepository.findAllUserWhoFriendUser(username);
+        for(String name: myFriends) {
             User friendAccount = getByUsername(name);
-            friendsList.add( new FindUserResponse(friendAccount.getUsername(), friendAccount.getELO(), friendAccount.getGamesPlayed(), friendAccount.getGamesWon()));
-
+            if(peopleWhoFriendMe.contains(name)){
+                friendsList.get("friends").add(
+                        new UserResponse(
+                                friendAccount.getUsername(),
+                                friendAccount.getELO(),
+                                friendAccount.getGamesPlayed(),
+                                friendAccount.getGamesWon(),
+                                friendAccount.getAvatar()
+                        ));
+            }else{
+                friendsList.get("outgoingRequests").add(
+                        new UserResponse(
+                                friendAccount.getUsername(),
+                                friendAccount.getELO(),
+                                friendAccount.getGamesPlayed(),
+                                friendAccount.getGamesWon(),
+                                friendAccount.getAvatar()
+                        ));
+            }
         }
-
+        for(String name : peopleWhoFriendMe){
+            if(!myFriends.contains(name)){
+                User friendAccount = getByUsername(name);
+                friendsList.get("incomingRequests").add(
+                        new UserResponse(friendAccount.getUsername(),
+                                friendAccount.getELO(),
+                                friendAccount.getGamesPlayed(),
+                                friendAccount.getGamesWon(),
+                                friendAccount.getAvatar()
+                        ));
+            }
+        }
         return friendsList;
-
     }
 
-    public static List<FindUserResponse> getTopTenByElo() {
+    public static List<UserResponse> getTopTenByElo() {
         List<User> userList = userRepository.getTopTenInElo();
-        List<FindUserResponse> topTenList = new ArrayList<>();
+        List<UserResponse> topTenList = new ArrayList<>();
 
         for(User user: userList){
-            topTenList.add(new FindUserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon()));
+            topTenList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
         }
 
         return topTenList;
     }
 
-    public static List<FindUserResponse> getRankingsByELO() {
+    public static List<UserResponse> getRankingsByELO() {
 
         List<User> userList = userRepository.getAllOrderByElo();
-        List<FindUserResponse> rankingsList = new ArrayList<>();
+        List<UserResponse> rankingsList = new ArrayList<>();
 
         for(User user: userList){
-            rankingsList.add(new FindUserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon()));
+            rankingsList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
         }
 
         return rankingsList;
     }
 
-    public static int getRankByElo(String username, List<FindUserResponse> rankingList) {
+    public static int getRankByElo(String username, List<UserResponse> rankingList) {
 
-        for(FindUserResponse user: rankingList){
+        for(UserResponse user: rankingList){
             if(user.getUsername().equals(username)){ return rankingList.indexOf(user); }
         }
 

@@ -1,6 +1,5 @@
 package com.revature.wordsaway.repositories;
 
-import com.revature.wordsaway.dtos.responses.FindUserResponse;
 import com.revature.wordsaway.models.entities.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -35,13 +34,15 @@ public interface UserRepository extends CrudRepository<User, String> {
 
     //Friend QUERIES
     @Query(value = "SELECT friend_name FROM friends WHERE username = ?1", nativeQuery = true)
-    List<String> getAllFriends(String username);
+    List<String> findAllFriends(String username);
+
+    @Query(value = "SELECT username FROM friends WHERE friend_name = ?1", nativeQuery = true)
+    List<String> findAllUserWhoFriendUser(String username);
 
     @Transactional
     @Modifying
     @Query(value = "INSERT into friends (username, friend_name) VALUES (?1, ?2)", nativeQuery = true)
     void addFriend(String username, String friendName);
-
 
     @Transactional
     @Modifying

@@ -2,7 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
-import com.revature.wordsaway.dtos.responses.FindUserResponse;
+import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
@@ -293,13 +293,14 @@ class UserServiceTest {
 
     @Test void test_addFriend(){
         when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
-        userService.addFriend(mockProfile, "username");
+        userService.addFriend(mockProfile.getUsername(), "username");
         verify(mockUserRepo, times(1)).addFriend(any(), any());
     }
 
     @Test void test_removeFriend(){
         when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
-        userService.removeFriend(mockProfile, "username");
+        when(mockUserRepo.findAllFriends(any())).thenReturn(Arrays.asList("username"));
+        userService.removeFriend(mockProfile.getUsername(), "username");
         verify(mockUserRepo, times(1)).removeFriend(any(), any());
     }
 
@@ -434,7 +435,7 @@ class UserServiceTest {
     //Delg added v2
     @Test void test_GetFriendByUserName_CorrectName_succeed(){
         when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
-        FindUserResponse friend = userService.getFriendByUsername("username");
+        UserResponse friend = userService.getFriendByUsername("username");
         verify(mockUserRepo, times(1)).findUserByUsername(any());
         assertNotNull(friend);
     }
@@ -443,7 +444,7 @@ class UserServiceTest {
         ArrayList<String> mockFriendNames = new ArrayList<String>();
         mockFriendNames.add("Friend1");
         mockFriendNames.add("Friend2");
-        when(mockUserRepo.getAllFriends(any())).thenReturn(mockFriendNames);
+        when(mockUserRepo.findAllFriends(any())).thenReturn(mockFriendNames);
 
         when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
         when(mockProfile.getUsername()).thenReturn("name");
@@ -451,7 +452,7 @@ class UserServiceTest {
         when(mockProfile.getGamesPlayed()).thenReturn(1);
         when(mockProfile.getGamesWon()). thenReturn(1);
 
-        List<FindUserResponse> friendsList = userService.getFriendsList("username");
+        Map<String, List<UserResponse>> friendsList = userService.getFriendsList("username");
         assertNotNull(friendsList);
 
     }
@@ -511,19 +512,16 @@ class UserServiceTest {
     }
 
     @Test void test_GetRankByElo_RankExists_succeed(){
-
-        FindUserResponse testUser = new FindUserResponse("test", 1.0f, 2, 1);
-        FindUserResponse mockProfile = new FindUserResponse("Mock", 1.0f, 1, 1);
-        ArrayList<FindUserResponse> mockRankList = new ArrayList<>();
+        UserResponse testUser = new UserResponse("test", 1.0f, 2, 1, 0);
+        UserResponse mockProfile = new UserResponse("Mock", 1.0f, 1, 1, 0);
+        ArrayList<UserResponse> mockRankList = new ArrayList<>();
         mockRankList.add(mockProfile);
         mockRankList.add(mockProfile);
         mockRankList.add(mockProfile);
         mockRankList.add(mockProfile);
         mockRankList.add(mockProfile);
         mockRankList.add(testUser);
-
         assertEquals(userService.getRankByElo("test", mockRankList), 5);
-
     }
 
 }

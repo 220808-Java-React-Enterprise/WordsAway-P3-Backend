@@ -1,17 +1,19 @@
 package com.revature.wordsaway.dtos.responses;
 
-public class FindUserResponse {
+public class UserResponse {
 
     private String username;
     private float elo;
     private int gamesPlayed;
     private int gamesWon;
+    private int avatar;
 
-    public FindUserResponse(String username, float elo, int gamesPlayed, int gamesWon) {
+    public UserResponse(String username, float elo, int gamesPlayed, int gamesWon, int avatar) {
         this.username = username;
         this.elo = elo;
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
+        this.avatar = avatar;
     }
 
     public String getUsername() {
@@ -28,5 +30,9 @@ public class FindUserResponse {
 
     public int getGamesWon() {
         return gamesWon;
+    }
+
+    public int getAvatar(){
+        return avatar;
     }
 }

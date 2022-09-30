@@ -73,7 +73,7 @@ Words Away V2 is a Social Media application centered on everyone's favorite game
 - Mobile Support
 
 ## ERD
-![ERD](ERD.png)
+![ERD](src/main/resources/ERD.png)
 
 ## Contributors
 #### Leads

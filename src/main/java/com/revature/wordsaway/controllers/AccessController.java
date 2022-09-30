@@ -2,6 +2,7 @@ package com.revature.wordsaway.controllers;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
@@ -33,16 +34,23 @@ public class AccessController {
 
     @CrossOrigin
     @PostMapping(value = "/login", consumes = "application/json")
-    public String login(@RequestBody LoginRequest request, HttpServletResponse resp) {
+    public UserResponse login(@RequestBody LoginRequest request, HttpServletResponse resp) {
         try {
             String token = UserService.login(request);
             resp.setHeader("Authorization", token);
             resp.setHeader("Access-Control-Expose-Headers", "Authorization");
-            return "Logged In";
+            User user = UserService.getByUsername(request.getUsername());
+            return new UserResponse(
+                    user.getUsername(),
+                    user.getELO(),
+                    user.getGamesPlayed(),
+                    user.getGamesWon(),
+                    user.getAvatar()
+            );
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
-            return e.getMessage();
+            return null;
         }
     }
 
