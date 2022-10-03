@@ -51,7 +51,7 @@ public class UserController {
 
     }
 
-
+    @CrossOrigin
     @PostMapping(value = "/addFriend", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean addFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
@@ -79,11 +79,15 @@ public class UserController {
         }
     }
 
+
+    @CrossOrigin
     @PostMapping(value = "/acceptFriendRequest", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean acceptFriendRequest(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         return addFriend(username, req, resp);
     }
 
+
+    @CrossOrigin
     @PostMapping(value = "/rejectFriendRequest", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean rejectFriendRequest(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
