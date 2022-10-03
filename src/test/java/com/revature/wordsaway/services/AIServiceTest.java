@@ -1,8 +1,9 @@
 package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,6 @@ public class AIServiceTest {
     private Board mockBoard;
     private Board newBoard;
     private AIService aiService;
-    private MockedStatic<AnagramService> mockAnagram;
     private BoardRequest request;
     private final char[] letters = new char[BOARD_SIZE * BOARD_SIZE];
     private final char[] worms = new char[BOARD_SIZE * BOARD_SIZE];
@@ -39,8 +39,7 @@ public class AIServiceTest {
         tray[4] = 'R';
         tray[5] = 'H';
         tray[6] = 'N';
-
-        newBoard = new Board(UUID.fromString("00000000-0000-0000-0000-000000000000"), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), true);
+        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null);
 
         mockRepo = mock(BoardRepository.class);
         boardService = new BoardService(mockRepo);
@@ -61,7 +60,6 @@ public class AIServiceTest {
         mockBoard = null;
         newBoard = null;
         aiService = null;
-        mockAnagram = null;
         request = null;
     }
 

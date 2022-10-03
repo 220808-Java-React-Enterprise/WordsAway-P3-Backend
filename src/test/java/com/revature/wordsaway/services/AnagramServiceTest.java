@@ -30,7 +30,7 @@ class AnagramServiceTest {
 
         while (pattern.length() > 1){
             List<String> getAllList = anagramService.getAll(tray, pattern);
-            System.out.println(getAllList);
+            //System.out.println(getAllList);
             pattern = pattern.substring(0, pattern.lastIndexOf("_"));
         }
     }

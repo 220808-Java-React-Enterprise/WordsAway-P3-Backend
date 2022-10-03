@@ -2,8 +2,9 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class BoardService {
                 worms,
                 blankArr,
                 gameID,
-                isActive
+                isActive ? GameState.YOUR_TURN : GameState.OPPONENTS_TURN,
+                null
         );
         boardRepository.save(board);
         return board;
@@ -59,6 +61,12 @@ public class BoardService {
     public static List<Board> getByGameID(UUID gameID) throws InvalidRequestException {
         List<Board> boards = boardRepository.findBoardByGameID(gameID);
         if(boards == null || boards.size() == 0) throw new InvalidRequestException("No boards with gameID " + gameID + " found.");
+        return boards;
+    }
+
+    public static List<Board> getAllByUsername(String username) {
+        List<Board> boards = boardRepository.findAllBoardsByUsername(username);
+        if(boards == null || boards.size() == 0) throw new InvalidRequestException("No boards with by player with username " + username + " found.");
         return boards;
     }
 
@@ -170,7 +178,7 @@ public class BoardService {
             // Check if you can get to end
             if (col ? end < BOARD_SIZE * BOARD_SIZE : start / BOARD_SIZE == end / BOARD_SIZE){
                 flag = true;
-                while (flag ? curr < end : curr >= start) {
+                while (curr < end && curr >= start) {
                     if (worms[curr] == '.') {
                         if (body)
                             worms[curr] = col ? wormBody[1] : wormBody[0];
@@ -193,7 +201,7 @@ public class BoardService {
                         if (!flag) worms[curr] = '.';
                         flag = false;
                     }
-                    curr += flag ? increment : increment * - 1;
+                    curr += flag ? increment : increment * -1;
                 }
                 if (flag) i++;
             }

@@ -1,4 +1,5 @@
-package com.revature.wordsaway.entities;
+package com.revature.wordsaway.models.entities;
+
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -29,8 +30,12 @@ public class User {
     private boolean isCPU;
 
     @ManyToMany
-    @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_username"))
+    @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_name"))
     private Set<User> friends = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "chats_jnc", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "chat"))
+    private Set<Chat> chats = new HashSet<>();
 
     protected User(){}
     public User(String username, String password, String salt, String email, int avatar, float elo, int gamesPlayed, int gamesWon, boolean isCPU, Set<User> friends) {

@@ -2,8 +2,8 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import org.junit.jupiter.api.*;
@@ -251,6 +251,27 @@ public class BoardServiceTest {
     }
 
     @Test
+    public void test_getAllByUsername_succeed(){
+        List<Board> mockBoards = new ArrayList<>();
+        mockBoards.add(mockBoard);
+        mockBoards.add(mockBoard);
+        when(mockRepo.findAllBoardsByUsername(any())).thenReturn(mockBoards);
+        List<Board> board = boardService.getAllByUsername("username");
+        assertNotNull(board);
+        verify(mockRepo, times(1)).findAllBoardsByUsername(any());
+    }
+
+    @Test
+    public void test_getAllByUsername_fail(){
+        when(mockRepo.findAllBoardsByUsername(any())).thenReturn(null);
+        InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class, () -> {
+            boardService.getAllByUsername("username");
+        });
+        verify(mockRepo, times(1)).findAllBoardsByUsername(any());
+        Assertions.assertEquals("No boards with by player with username username found.", thrown.getMessage());
+    }
+
+    @Test
     public void test_getOpposingBoard_succeed(){
         when(mockRepo.findOpposingBoardByIDAndGameID(any(), any())).thenReturn(mockBoard);
         when(mockBoard.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
@@ -369,11 +390,11 @@ public class BoardServiceTest {
             if (letter != '.')
                 countShipLength++;
 
-            if (counter % BOARD_SIZE < BOARD_SIZE - 1) System.out.print(letter + ", ");
-            else System.out.println(letter);
-            counter++;
+//            if (counter % BOARD_SIZE < BOARD_SIZE - 1) System.out.print(letter + ", ");
+//            else System.out.println(letter);
+//            counter++;
         }
-        System.out.println();
+//        System.out.println();
 
         assertEquals(17, countShipLength);
     }
@@ -415,7 +436,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @RepeatedTest(BOARD_SIZE * BOARD_SIZE)
@@ -431,7 +452,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @RepeatedTest(BOARD_SIZE * BOARD_SIZE)
@@ -442,7 +463,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("a"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("A"), times(1));
     }
 
     @Test
@@ -473,7 +494,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @RepeatedTest(BOARD_SIZE * BOARD_SIZE)
@@ -493,7 +514,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @RepeatedTest(BOARD_SIZE * BOARD_SIZE)
@@ -507,7 +528,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("a"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("A"), times(1));
     }
 
     @Test
@@ -520,7 +541,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -534,7 +555,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -545,7 +566,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("at"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("AT"), times(1));
     }
 
     @Test
@@ -569,7 +590,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -583,7 +604,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -592,11 +613,11 @@ public class BoardServiceTest {
         move[6 * BOARD_SIZE + 7] = 'A';
         move[7 * BOARD_SIZE + 7] = 'T';
         when(request.getLayout()).thenReturn(move);
-        anagramServiceMockedStatic.when(() -> AnagramService.isWord("a")).thenReturn(false);
+        anagramServiceMockedStatic.when(() -> AnagramService.isWord("A")).thenReturn(false);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("a"), times(1));
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("at"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("A"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("AT"), times(1));
     }
 
     @Test
@@ -620,7 +641,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -634,7 +655,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -645,7 +666,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("ta"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TA"), times(1));
     }
 
     @Test
@@ -669,7 +690,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -683,7 +704,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -692,11 +713,11 @@ public class BoardServiceTest {
         move[7 * BOARD_SIZE + 7] = 'T';
         move[8 * BOARD_SIZE + 7] = 'A';
         when(request.getLayout()).thenReturn(move);
-        anagramServiceMockedStatic.when(() -> AnagramService.isWord("a")).thenReturn(false);
+        anagramServiceMockedStatic.when(() -> AnagramService.isWord("A")).thenReturn(false);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("a"), times(1));
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("ta"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("A"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TA"), times(1));
     }
 
     @Test
@@ -721,7 +742,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("tests"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TESTS"), times(1));
     }
 
     @Test
@@ -735,7 +756,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("tests"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TESTS"), times(1));
     }
 
     @Test
@@ -750,7 +771,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("tests"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TESTS"), times(1));
     }
 
     @Test
@@ -765,7 +786,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test
@@ -780,7 +801,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("tests"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TESTS"), times(1));
     }
 
     @Test
@@ -795,7 +816,7 @@ public class BoardServiceTest {
         when(request.getLayout()).thenReturn(move);
         boardService.validateMove(request);
         verify(mockRepo, times(1)).findBoardByID(any());
-        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("test"), times(1));
+        anagramServiceMockedStatic.verify(() -> AnagramService.isWord("TEST"), times(1));
     }
 
     @Test

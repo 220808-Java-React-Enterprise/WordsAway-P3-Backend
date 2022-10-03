@@ -2,13 +2,15 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.UserRepository;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
+import com.revature.wordsaway.utils.customExceptions.NotFoundException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +29,7 @@ class UserServiceTest {
     private UserService userService;
     private NewUserRequest mockRequest;
     private MockedStatic<TokenService> tokenServiceMockedStatic;
-    private User mockUser;
+    private User mockProfile;
 
     @BeforeEach
     public void setup() {
@@ -41,7 +43,8 @@ class UserServiceTest {
         when(mockRequest.getSalt()).thenReturn("00000000000000000000000000000000");
         tokenServiceMockedStatic = mockStatic(TokenService.class);
         tokenServiceMockedStatic.when(() -> TokenService.generateToken(any())).thenReturn("testtoken");
-        mockUser = mock(User.class);
+        mockProfile = mock(User.class);
+
     }
 
     @AfterEach
@@ -52,7 +55,7 @@ class UserServiceTest {
         mockRequest = null;
         tokenServiceMockedStatic.close();
         tokenServiceMockedStatic = null;
-        mockUser = null;
+        mockProfile = null;
     }
 
     @Test
@@ -272,20 +275,33 @@ class UserServiceTest {
 
     @Test
     public void test_update_succeed(){
-        when(mockUser.getUsername()).thenReturn("username");
-        when(mockUser.getPassword()).thenReturn("password");
-        when(mockUser.getSalt()).thenReturn("00000000000000000000000000000000");
-        when(mockUser.getELO()).thenReturn(1000F);
-        when(mockUser.getGamesPlayed()).thenReturn(0);
-        when(mockUser.getGamesWon()).thenReturn(0);
-        when(mockUser.isCPU()).thenReturn(false);
-        userService.update(mockUser);
+        when(mockProfile.getUsername()).thenReturn("username");
+        when(mockProfile.getPassword()).thenReturn("password");
+        when(mockProfile.getSalt()).thenReturn("00000000000000000000000000000000");
+        when(mockProfile.getELO()).thenReturn(1000F);
+        when(mockProfile.getGamesPlayed()).thenReturn(0);
+        when(mockProfile.getGamesWon()).thenReturn(0);
+        when(mockProfile.isCPU()).thenReturn(false);
+        userService.update(mockProfile);
         //verify(mockUserRepo, times(1)).updateUser(any(), any(), any(), any(), any(), any()); //TODO figure out why this doesn't work
-        verify(mockUser, times(1)).getUsername();
-        verify(mockUser, times(1)).getPassword();
-        verify(mockUser, times(1)).getELO();
-        verify(mockUser, times(1)).getGamesPlayed();
-        verify(mockUser, times(1)).getGamesWon();
+        verify(mockProfile, times(1)).getUsername();
+        verify(mockProfile, times(1)).getPassword();
+        verify(mockProfile, times(1)).getELO();
+        verify(mockProfile, times(1)).getGamesPlayed();
+        verify(mockProfile, times(1)).getGamesWon();
+    }
+
+    @Test void test_addFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
+        userService.addFriend(mockProfile.getUsername(), "username");
+        verify(mockUserRepo, times(1)).addFriend(any(), any());
+    }
+
+    @Test void test_removeFriend(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
+        when(mockUserRepo.findAllFriends(any())).thenReturn(Arrays.asList("username"));
+        userService.removeFriend(mockProfile.getUsername(), "username");
+        verify(mockUserRepo, times(1)).removeFriend(any(), any());
     }
 
     @Test
@@ -293,8 +309,8 @@ class UserServiceTest {
         LoginRequest request = mock(LoginRequest.class);
         when(request.getPassword()).thenReturn("password");
         when(request.getUsername()).thenReturn("username");
-        when(mockUser.getPassword()).thenReturn("password");
-        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        when(mockProfile.getPassword()).thenReturn("password");
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
         String token = userService.login(request);
         verify(mockUserRepo, times(1)).findUserByUsername(any());
         assertEquals(token, "testtoken");
@@ -305,8 +321,8 @@ class UserServiceTest {
         LoginRequest request = mock(LoginRequest.class);
         when(request.getPassword()).thenReturn("wrong password");
         when(request.getUsername()).thenReturn("username");
-        when(mockUser.getPassword()).thenReturn("password");
-        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        when(mockProfile.getPassword()).thenReturn("password");
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
         final String[] token = new String[1];
         AuthenticationException thrown = Assertions.assertThrows(AuthenticationException.class, () -> {
             token[0] = userService.login(request);
@@ -318,7 +334,7 @@ class UserServiceTest {
 
     @Test
     public void test_getByUsername_succeed(){
-        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
         User user = userService.getByUsername("username");
         verify(mockUserRepo, times(1)).findUserByUsername(any());
         assertNotNull(user);
@@ -336,7 +352,7 @@ class UserServiceTest {
 
     @Test
     public void test_getAll_succeed(){
-        when(mockUserRepo.findAll()).thenReturn(Arrays.asList(mockUser));
+        when(mockUserRepo.findAll()).thenReturn(Arrays.asList(mockProfile));
         List<User> users = userService.getAll();
         verify(mockUserRepo, times(1)).findAll();
         assertNotNull(users);
@@ -353,13 +369,13 @@ class UserServiceTest {
     }
 
     @Test void test_getAllOpponents_succeed(){
-        when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockUser));
-        when(mockUser.getUsername()).thenReturn("username");
-        when(mockUser.getELO()).thenReturn(1000F);
+        when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockProfile));
+        when(mockProfile.getUsername()).thenReturn("username");
+        when(mockProfile.getELO()).thenReturn(1000F);
         Board mockBoard = mock(Board.class);
         UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(mockBoard.getId()).thenReturn(uuid);
-        when(mockBoard.getUser()).thenReturn(mockUser);
+        when(mockBoard.getUser()).thenReturn(mockProfile);
         when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
@@ -371,7 +387,8 @@ class UserServiceTest {
         assertEquals(opponents.get(0).getBoard_id(), uuid);
     }
 
-    @Test void test_getAllOpponents_NoOtherUsers_succeed(){
+    @Test
+    void test_getAllOpponents_NoOtherUsers_succeed(){
         when(mockUserRepo.findAllOtherUsers(any())).thenReturn(new ArrayList<>());
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
@@ -380,10 +397,11 @@ class UserServiceTest {
         assertEquals(opponents.size(), 0);
     }
 
-    @Test void test_getAllOpponents_NoBoards_succeed(){
-        when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockUser));
-        when(mockUser.getUsername()).thenReturn("username");
-        when(mockUser.getELO()).thenReturn(1000F);
+    @Test
+    void test_getAllOpponents_NoBoards_succeed(){
+        when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockProfile));
+        when(mockProfile.getUsername()).thenReturn("username");
+        when(mockProfile.getELO()).thenReturn(1000F);
         when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(new ArrayList<>());
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
@@ -394,4 +412,116 @@ class UserServiceTest {
         assertEquals(opponents.get(0).getElo(), 1000F);
         assertNull(opponents.get(0).getBoard_id());
     }
+
+    @Test void test_getAllOpponents_WithParameter_succeed(){
+        when(mockUserRepo.findAllOtherUsers("username", true)).thenReturn(Arrays.asList(mockProfile));
+        when(mockProfile.getUsername()).thenReturn("username");
+        when(mockProfile.getELO()).thenReturn(1000F);
+        Board mockBoard = mock(Board.class);
+        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        when(mockBoard.getId()).thenReturn(uuid);
+        when(mockBoard.getUser()).thenReturn(mockProfile);
+        when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
+        List<OpponentResponse> opponents = userService.getAllOpponents("username", true);
+        verify(mockUserRepo, times(1)).findAllOtherUsers("username", true);
+        verify(mockBoardRepo, times(1)).findBoardsByTwoUsernames(any(), any());
+        assertNotNull(opponents);
+        assertEquals(opponents.size(), 1);
+        assertEquals(opponents.get(0).getUsername(), "username");
+        assertEquals(opponents.get(0).getElo(), 1000F);
+        assertEquals(opponents.get(0).getBoard_id(), uuid);
+    }
+
+    //Delg added v2
+    @Test void test_GetFriendByUserName_CorrectName_succeed(){
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
+        UserResponse friend = userService.getFriendByUsername("username");
+        verify(mockUserRepo, times(1)).findUserByUsername(any());
+        assertNotNull(friend);
+    }
+
+    @Test void test_GetFriendsList_CorrectUsername_succeed(){
+        ArrayList<String> mockFriendNames = new ArrayList<String>();
+        mockFriendNames.add("Friend1");
+        mockFriendNames.add("Friend2");
+        when(mockUserRepo.findAllFriends(any())).thenReturn(mockFriendNames);
+
+        when(mockUserRepo.findUserByUsername(any())).thenReturn(mockProfile);
+        when(mockProfile.getUsername()).thenReturn("name");
+        when(mockProfile.getELO()).thenReturn(1.0f);
+        when(mockProfile.getGamesPlayed()).thenReturn(1);
+        when(mockProfile.getGamesWon()). thenReturn(1);
+
+        Map<String, List<UserResponse>> friendsList = userService.getFriendsList("username");
+        assertNotNull(friendsList);
+
+    }
+
+    @Test void test_GetTopTenByElo_AtLeastTen_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        when(mockUserRepo.getTopTenInElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getTopTenByElo().size(), 10);
+
+    }
+
+
+    @Test void test_GetTopTenByElo_Zero_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        when(mockUserRepo.getTopTenInElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getTopTenByElo().size(), 0);
+
+    }
+
+    @Test void test_GetRankingsByElo_SizeEqualsTen_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 10);
+    }
+    @Test void test_GetRankingsByElo_SizeEqualsZero_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 0);
+    }
+
+    @Test void test_GetRankByElo_RankExists_succeed(){
+        UserResponse testUser = new UserResponse("test", 1.0f, 2, 1, 0);
+        UserResponse mockProfile = new UserResponse("Mock", 1.0f, 1, 1, 0);
+        ArrayList<UserResponse> mockRankList = new ArrayList<>();
+        mockRankList.add(mockProfile);
+        mockRankList.add(mockProfile);
+        mockRankList.add(mockProfile);
+        mockRankList.add(mockProfile);
+        mockRankList.add(mockProfile);
+        mockRankList.add(testUser);
+        assertEquals(userService.getRankByElo("test", mockRankList), 5);
+    }
+
 }

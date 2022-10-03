@@ -1,14 +1,18 @@
 package com.revature.wordsaway.controllers;
 
-import com.revature.wordsaway.entities.Board;
-import com.revature.wordsaway.entities.User;
+import com.revature.wordsaway.dtos.responses.OpponentResponse;
+import com.revature.wordsaway.models.entities.Board;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.BoardService;
+import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,5 +66,12 @@ public class TestController {
             resp.setStatus(e.getStatusCode());
             return e.getMessage();
         }
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/optional", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String optional(@RequestParam(required = false) String type, HttpServletRequest req, HttpServletResponse resp) {
+        if(type == null) return "Plop";
+        return type;
     }
 }
