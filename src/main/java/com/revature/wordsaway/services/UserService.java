@@ -228,7 +228,8 @@ public class UserService {
     public static int getRankByElo(String username, List<UserResponse> rankingList) {
 
         for(UserResponse user: rankingList){
-            if(user.getUsername().equals(username)){ return rankingList.indexOf(user); }
+            //added one so the rank can be displayed as is.
+            if(user.getUsername().equals(username)){ return rankingList.indexOf(user) + 1; }
         }
 
         throw new NotFoundException("Username not found in the rankings list. Please refresh and try again. If problem persists please contact us.");

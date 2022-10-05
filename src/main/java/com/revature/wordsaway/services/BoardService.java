@@ -49,7 +49,7 @@ public class BoardService {
     }
 
     public static void update(Board board){
-        boardRepository.updateBoard(board.getId(), board.getFireballs(), board.isActive(), board.getLetters(), board.getTray(), board.getWorms());
+        boardRepository.updateBoard(board.getId(), board.getFireballs(), board.getGameState().ordinal(), board.getLetters(), board.getTray(), board.getWorms());
     }
 
     public static Board getByID(UUID boardID) {
@@ -465,4 +465,11 @@ public class BoardService {
         List<Board> boards = boardRepository.findBoardByGameID(gameID);
         boardRepository.deleteAll(boards);
     }
+
+ /*   //Delg v2 //TODO: add exception handling.
+    public static List<Board> getAllActiveBoardsByUsername(String username){
+        return boardRepository.findAllOngoingBoardsByUsername(username);
+
+    }*/
+
 }

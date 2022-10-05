@@ -51,10 +51,10 @@ public interface UserRepository extends CrudRepository<User, String> {
 
 
     //LOBBY QUERIES
-    @Query(value = "SELECT * FROM users ORDER BY elo DESC LIMIT 10", nativeQuery = true)
+    @Query(value = "SELECT * FROM users ORDER BY elo DESC, games_won DESC, games_played DESC, username ASC LIMIT 10", nativeQuery = true)
     List<User> getTopTenInElo();
 
-    @Query(value = "SELECT * FROM users ORDER BY elo DESC", nativeQuery = true)
+    @Query(value = "SELECT * FROM users ORDER BY elo DESC, games_won DESC, games_played DESC, username ASC", nativeQuery = true)
     List<User> getAllOrderByElo();
 
 
