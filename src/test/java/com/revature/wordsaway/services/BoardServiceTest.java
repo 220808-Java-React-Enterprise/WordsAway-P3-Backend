@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
+import com.revature.wordsaway.models.GameState;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
@@ -195,7 +196,7 @@ public class BoardServiceTest {
     public void test_update_succeed(){
         when(mockBoard.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         when(mockBoard.getFireballs()).thenReturn(0);
-        when(mockBoard.isActive()).thenReturn(false);
+        when(mockBoard.getGameState()).thenReturn(GameState.OPPONENTS_TURN);
         when(mockBoard.getTray()).thenReturn("ATTEESSTT".toCharArray());
         when(mockBoard.getLetters()).thenReturn(BLANK_BOARD);
         when(mockBoard.getWorms()).thenReturn(BLANK_BOARD);
@@ -203,7 +204,7 @@ public class BoardServiceTest {
         //verify(mockRepo, times(1)).updateBoard(any(), any(), any(), any(), any(), any()); //TODO figure out why this doesn't work
         verify(mockBoard, times(1)).getId();
         verify(mockBoard, times(1)).getFireballs();
-        verify(mockBoard, times(1)).isActive();
+        verify(mockBoard, times(1)).getGameState();
         verify(mockBoard, times(1)).getTray();
         verify(mockBoard, times(1)).getLetters();
         verify(mockBoard, times(1)).getWorms();
