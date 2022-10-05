@@ -1,8 +1,6 @@
 package com.revature.wordsaway.models.entities;
 
-import com.revature.wordsaway.models.GameState;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
-import org.hibernate.annotations.GenericGenerator;
+import com.revature.wordsaway.models.enums.GameState;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;

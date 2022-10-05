@@ -29,7 +29,7 @@ public class User {
     @Column(name = "is_cpu", nullable = false)
     private boolean isCPU;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_name"))
     private Set<User> friends = new HashSet<>();
 

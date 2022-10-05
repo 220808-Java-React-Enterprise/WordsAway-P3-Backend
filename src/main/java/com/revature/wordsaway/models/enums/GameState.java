@@ -1,4 +1,4 @@
-package com.revature.wordsaway.models;
+package com.revature.wordsaway.models.enums;
 
 public enum GameState {
     NULL,
