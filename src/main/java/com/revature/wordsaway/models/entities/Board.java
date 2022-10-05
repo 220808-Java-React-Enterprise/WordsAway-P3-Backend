@@ -31,7 +31,7 @@ public class Board implements Cloneable{
     private char[] letters;
     @Column(name = "game_id", nullable = false)
     private UUID gameID;
-    @Column(name = "gameState", nullable = false)
+    @Column(name = "game_state", nullable = false)
     private GameState gameState;
     @Column(name = "completed")
     private Timestamp completed;

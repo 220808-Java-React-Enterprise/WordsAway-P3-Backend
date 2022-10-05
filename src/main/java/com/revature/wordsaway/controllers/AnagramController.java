@@ -11,17 +11,17 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/anagram")
 public class AnagramController {
     // TODO remove from final to prevent cheating or make only accessible by CUPs
-    @CrossOrigin
-    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody String anagramAll(@Param("letters") String letters, HttpServletResponse resp){
-        try{
-            return "";//AnagramService.getAll(letters);
-        } catch (NetworkException e){
-            resp.setStatus(e.getStatusCode());
-            System.out.println(e.getMessage());
-            return e.getMessage();
-        }
-    }
+//    @CrossOrigin
+//    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public @ResponseBody String anagramAll(@Param("letters") String letters, HttpServletResponse resp){
+//        try{
+//            return String.join(",", AnagramService.getAll(letters.toCharArray()));
+//        } catch (NetworkException e){
+//            resp.setStatus(e.getStatusCode());
+//            System.out.println(e.getMessage());
+//            return e.getMessage();
+//        }
+//    }
 
     @CrossOrigin
     @GetMapping(value = "/isWord", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -35,6 +35,7 @@ public class AnagramService {
     }
 
     public static boolean isWord(String letters){
+        if (letters.length() <= 1) return false;
         for (int i = START_POINT_BY_WORD_LENGTH.get(letters.length()); i < START_POINT_BY_WORD_LENGTH.get(letters.length() + 1); i++)
             if (VALID_WORDS.get(i).equals(letters.toUpperCase())) return true;
         return false;

@@ -2,13 +2,10 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.models.entities.Board;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.tree.Tree;
 
-import java.io.LineNumberReader;
 import java.util.*;
 
 import static com.revature.wordsaway.utils.Constants.BOARD_SIZE;
-import static com.revature.wordsaway.utils.Constants.VALID_WORDS;
 
 // todo run bot while user is making move to negate wait time on bot
 @Service
