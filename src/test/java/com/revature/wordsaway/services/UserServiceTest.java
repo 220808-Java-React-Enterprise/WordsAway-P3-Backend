@@ -10,7 +10,6 @@ import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.UserRepository;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
-import com.revature.wordsaway.utils.customExceptions.NotFoundException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -503,6 +502,26 @@ class UserServiceTest {
 
         assertEquals(userService.getRankingsByELO().size(), 10);
     }
+
+
+    @Test void test_GetRankingsByElo_CheckRankConsistency_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        mockUserNames.add(mockProfile);
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 10);
+    }
+
     @Test void test_GetRankingsByElo_SizeEqualsZero_succeed(){
 
         ArrayList<User> mockUserNames = new ArrayList<>();
