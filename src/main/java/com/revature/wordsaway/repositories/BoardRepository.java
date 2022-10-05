@@ -32,4 +32,8 @@ public interface BoardRepository extends CrudRepository<Board, UUID> {
     @Modifying
     @Query(value = "UPDATE boards SET fireballs = ?2 , game_state = ?3, letters = ?4, tray = ?5, worms = ?6 WHERE id = ?1", nativeQuery = true)
     void updateBoard(UUID gameID, int fireballs, int gameState, char[] letters, char[] tray, char[] worms);
+
+    //Delg v2
+    @Query(value = "SELECT * FROM boards WHERE username = ?1 AND completed = null", nativeQuery = true)
+    List<Board> findAllOngoingBoardsByUsername(String username);
 }
