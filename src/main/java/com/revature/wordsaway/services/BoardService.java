@@ -49,7 +49,7 @@ public class BoardService {
     }
 
     public static void update(Board board){
-        boardRepository.updateBoard(board.getId(), board.getFireballs(), board.isActive(), board.getLetters(), board.getTray(), board.getWorms());
+        boardRepository.updateBoard(board.getId(), board.getFireballs(), board.getGameState().ordinal(), board.getLetters(), board.getTray(), board.getWorms());
     }
 
     public static Board getByID(UUID boardID) {
