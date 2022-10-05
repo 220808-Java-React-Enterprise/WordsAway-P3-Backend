@@ -465,4 +465,11 @@ public class BoardService {
         List<Board> boards = boardRepository.findBoardByGameID(gameID);
         boardRepository.deleteAll(boards);
     }
+
+ /*   //Delg v2 //TODO: add exception handling.
+    public static List<Board> getAllActiveBoardsByUsername(String username){
+        return boardRepository.findAllOngoingBoardsByUsername(username);
+
+    }*/
+
 }
