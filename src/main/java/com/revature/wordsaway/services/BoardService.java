@@ -22,7 +22,7 @@ public class BoardService {
         this.boardRepository = boardRepository;
     }
 
-    public static Board register(User user, UUID gameID, boolean isActive){
+    public static Board register(User user, UUID gameID, boolean isActive) {
         //TODO probably validate some things
         char[] blankArr = new char[BOARD_SIZE*BOARD_SIZE];
         char[] worms = new char[BOARD_SIZE * BOARD_SIZE];

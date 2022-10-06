@@ -104,7 +104,6 @@ public class GameController {
             BoardService.validateMove(request);
             return true;
         }catch (NetworkException e){
-            resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
             return false;
         }
