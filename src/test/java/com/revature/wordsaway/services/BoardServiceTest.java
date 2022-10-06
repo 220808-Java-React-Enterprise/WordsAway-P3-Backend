@@ -180,7 +180,7 @@ public class BoardServiceTest {
     public void test_register_succeed(){
         User mockUser = mock(User.class);
         UUID uuid = UUID.randomUUID();
-        Board board = boardService.register(mockUser, uuid, true);
+        Board board = boardService.register(mockUser, uuid, true, "PRACTICE");
         verify(mockRepo, times(1)).save(any());
         assertNotNull(board);
         assertNotNull(board.getId());
@@ -366,6 +366,8 @@ public class BoardServiceTest {
 
         boardService.findDestroyedWorms(localWorms, clone);
 
+//        System.out.println((char)(localWorms[39] - 100));
+//
 //        int counter = 0;
 //        for (int i = 0; i < BOARD_SIZE; i++) {
 //            for (int j = 0; j < BOARD_SIZE; j++)

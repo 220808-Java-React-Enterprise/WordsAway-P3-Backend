@@ -1,7 +1,8 @@
 package com.revature.wordsaway.utils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Constants {
@@ -14,12 +15,17 @@ public class Constants {
     private static List<String> populateValidWords(){
         List<String> words = new ArrayList<>();
 
+        BufferedReader br;
+
         try {
-            Scanner scanner = new Scanner(new File("src/main/resources/validWordSet.txt"));
+            br = Files.newBufferedReader(Paths.get("src/main/resources/validWordSet.txt"));
+        } catch (IOException e) {
+            br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Constants.class.getResourceAsStream("src/main/resources/validWordSet.txt"))));
+        }
 
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
                 if (!Constants.START_POINT_BY_WORD_LENGTH.containsKey(line.length()))
                     Constants.START_POINT_BY_WORD_LENGTH.put(line.length(), words.size());
 
@@ -29,7 +35,7 @@ public class Constants {
             START_POINT_BY_WORD_LENGTH.put(BOARD_SIZE + 1, words.size());
             return words;
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

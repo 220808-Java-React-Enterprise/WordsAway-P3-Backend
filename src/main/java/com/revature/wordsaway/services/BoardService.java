@@ -107,7 +107,7 @@ public class BoardService {
                 }
             }
         }
-        findDestroyedWorms(worms, originalWorms);
+        //findDestroyedWorms(worms, originalWorms);
         String winner = null;
         if(gameOver(myBoard.getId())) winner = myBoard.getUser().getUsername();
         if(gameOver(oppBoard.getId())) winner = oppBoard.getUser().getUsername();
@@ -139,7 +139,7 @@ public class BoardService {
                 flag = true;
                 while (flag || curr >= i) {
                     if (hit) {
-                        hitWorms[curr] = '#';
+                        hitWorms[curr] = (char) (originalWorms[curr] + 100);
                         if (endMarker) break;
                     } else {
                         if (!flag) hitWorms[curr] = hitWormsClone[curr];
