@@ -22,7 +22,7 @@ public class BoardService {
         this.boardRepository = boardRepository;
     }
 
-    public static Board register(User user, UUID gameID, boolean isActive){
+    public static Board register(User user, UUID gameID, boolean isActive, String type){
         //TODO probably validate some things
         char[] blankArr = new char[BOARD_SIZE*BOARD_SIZE];
         char[] worms = new char[BOARD_SIZE * BOARD_SIZE];
@@ -42,7 +42,8 @@ public class BoardService {
                 blankArr,
                 gameID,
                 isActive ? GameState.YOUR_TURN : GameState.OPPONENTS_TURN,
-                null
+                null,
+                type
         );
         boardRepository.save(board);
         return board;
