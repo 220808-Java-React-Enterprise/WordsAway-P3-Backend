@@ -15,8 +15,15 @@ public class Constants {
     private static List<String> populateValidWords(){
         List<String> words = new ArrayList<>();
 
-        try (BufferedReader br = Files.newBufferedReader(Paths.get("src/main/resources/validWordSet.txt"))) {
+        BufferedReader br;
 
+        try {
+            br = Files.newBufferedReader(Paths.get("src/main/resources/validWordSet.txt"));
+        } catch (IOException e) {
+            br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Constants.class.getResourceAsStream("src/main/resources/validWordSet.txt"))));
+        }
+
+        try {
             String line;
             while ((line = br.readLine()) != null) {
                 if (!Constants.START_POINT_BY_WORD_LENGTH.containsKey(line.length()))
