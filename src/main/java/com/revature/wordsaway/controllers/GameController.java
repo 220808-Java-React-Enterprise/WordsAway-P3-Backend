@@ -34,7 +34,7 @@ public class GameController {
     @CrossOrigin
     @PostMapping(value = "/makeGame", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public @ResponseBody String makeGame(@RequestBody GameRequest request, HttpServletResponse resp, HttpServletRequest req) {
+    public @ResponseBody String makeGame(@RequestParam(required = false) String type, @RequestBody GameRequest request, HttpServletResponse resp, HttpServletRequest req) {
         try {
             User user = TokenService.extractRequesterDetails(req);
             User opponent = UserService.getByUsername(request.getUsername());
@@ -43,9 +43,12 @@ public class GameController {
                 if(o.getUsername().equals(opponent.getUsername()) && o.getBoard_id() != null)
                     throw new InvalidRequestException("Can not start another match with "+ opponent.getUsername() + ". Finish existing game first.");
             }
+
+            if(type == null) type = "PRACTICE";
+
             UUID uuid = UUID.randomUUID();
-            BoardService.register(opponent, uuid, !opponent.isCPU());
-            Board board = BoardService.register(user, uuid, opponent.isCPU());
+            BoardService.register(opponent, uuid, !opponent.isCPU(), type.toUpperCase());
+            Board board = BoardService.register(user, uuid, opponent.isCPU(), type.toUpperCase());
             return board.getId().toString();
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
@@ -119,7 +122,7 @@ public class GameController {
             BoardService.makeMove(request, board);
             Board opposingBoard = BoardService.getOpposingBoard(board);
             User opponent = opposingBoard.getUser();
-            if (BoardService.gameOver(request.getBoardID())){
+            if (BoardService.gameOver(request.getBoardID()) && board.getType().toUpperCase().equals("RANKED")){
                 user.setELO(BoardService.calculateELO(user.getELO(), opponent.getELO(), true));
                 user.setGamesPlayed(user.getGamesPlayed() + 1);
                 user.setGamesWon(user.getGamesWon() + 1);

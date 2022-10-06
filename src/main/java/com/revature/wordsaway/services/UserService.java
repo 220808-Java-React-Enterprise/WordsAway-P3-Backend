@@ -239,14 +239,16 @@ public class UserService {
 
         User user = userRepository.findUserByUsername(username);
 
-        if(!currentPassword.equals(user.getPassword())){ throw new AuthenticationException("Incorrect password."); }
-        if(!(newPassword == null)) user.setPassword(newPassword);
-        if(email != null && !email.equals("")){
-            validateEmail(email);
-            checkAvailableEmail(email);
-            user.setEmail(email);
-        }
+        if(currentPassword.equals(user.getPassword())){
+            if (newPassword != null && !newPassword.equals("")) user.setPassword(newPassword);
+            if (email != null && !email.equals("")) {
+                validateEmail(email);
+                checkAvailableEmail(email);
+                user.setEmail(email);
+            }
 
-        userRepository.save(user);
+            userRepository.save(user);
+        }
+        else { throw new AuthenticationException("Incorrect password."); }
     }
 }

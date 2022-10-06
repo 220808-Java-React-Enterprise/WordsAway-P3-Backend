@@ -180,7 +180,7 @@ public class BoardServiceTest {
     public void test_register_succeed(){
         User mockUser = mock(User.class);
         UUID uuid = UUID.randomUUID();
-        Board board = boardService.register(mockUser, uuid, true);
+        Board board = boardService.register(mockUser, uuid, true, "PRACTICE");
         verify(mockRepo, times(1)).save(any());
         assertNotNull(board);
         assertNotNull(board.getId());
