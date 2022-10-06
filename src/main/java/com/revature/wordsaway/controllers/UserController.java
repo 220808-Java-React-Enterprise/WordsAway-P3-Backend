@@ -6,6 +6,8 @@ import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
+import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
+import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -66,11 +68,27 @@ public class UserController {
     }
 
     @CrossOrigin
+    @PostMapping(value = "/cancelFriend", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody boolean cancelFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            UserService.removeFriend(user.getUsername(), username);
+            return true;
+        }catch (NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    @CrossOrigin
     @PostMapping(value = "/removeFriend", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody boolean removeFriend(@RequestParam String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
             UserService.removeFriend(user.getUsername(), username);
+            UserService.removeFriend(username, user.getUsername());
             return true;
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
@@ -127,6 +145,22 @@ public class UserController {
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
             return 0;
+        }
+
+    }
+
+    @CrossOrigin
+    @PutMapping(value = "/settings/updateUser", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String settingsUpdateUser(@RequestBody String currentPassword, String email, String newPassword, HttpServletRequest req, HttpServletResponse resp){
+        try{
+            User user = TokenService.extractRequesterDetails(req);
+            UserService.settingsUpdateUser(user.getUsername(), email, currentPassword, newPassword);
+            return "Settings updated!";
+
+        }
+        catch(NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            return e.getMessage();
         }
 
     }

@@ -235,4 +235,24 @@ public class UserService {
         throw new NotFoundException("Username not found in the rankings list. Please refresh and try again. If problem persists please contact us.");
     }
 
+    public static void settingsUpdateUser(String username, String email, String currentPassword, String newPassword){
+
+        if(email != null && !email.equals("")){
+            validateEmail(email);
+            checkAvailableEmail(email);
+        }
+        else {  throw new InvalidRequestException("Email is invalid or already linked to an account. Please use a different email."); }
+
+        User user = userRepository.findUserByUsername(username);
+
+        if(currentPassword.equals(user.getPassword())){
+            if(!(email == null)) user.setEmail(email);
+            if(!(newPassword == null)) user.setPassword(newPassword);
+        }
+        else{
+            throw new AuthenticationException("incorrect password.");
+
+        }
+
+    }
 }

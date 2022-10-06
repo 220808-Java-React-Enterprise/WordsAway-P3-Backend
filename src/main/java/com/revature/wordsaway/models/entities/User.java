@@ -103,6 +103,15 @@ public class User {
         return friends;
     }
 
+    //Delg v2
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
