@@ -15,13 +15,7 @@ public class Constants {
     private static List<String> populateValidWords(){
         List<String> words = new ArrayList<>();
 
-        BufferedReader br;
-
-        try {
-            br = Files.newBufferedReader(Paths.get("src/main/resources/validWordSet.txt"));
-        } catch (IOException e) {
-            br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Constants.class.getResourceAsStream("src/main/resources/validWordSet.txt"))));
-        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Constants.class.getClassLoader().getResourceAsStream("validWordSet.txt"))));
 
         try {
             String line;
@@ -34,7 +28,6 @@ public class Constants {
             START_POINT_BY_WORD_LENGTH.put(BOARD_SIZE, words.size());
             START_POINT_BY_WORD_LENGTH.put(BOARD_SIZE + 1, words.size());
             return words;
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
