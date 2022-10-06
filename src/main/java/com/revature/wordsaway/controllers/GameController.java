@@ -103,8 +103,7 @@ public class GameController {
             TokenService.extractRequesterDetails(req);
             BoardService.validateMove(request);
             return true;
-        }catch (NetworkException e){
-            resp.setStatus(e.getStatusCode());
+        }catch (NetworkException e) {
             System.out.println(e.getMessage());
             return false;
         }

@@ -22,7 +22,7 @@ public class BoardService {
         this.boardRepository = boardRepository;
     }
 
-    public static Board register(User user, UUID gameID, boolean isActive){
+    public static Board register(User user, UUID gameID, boolean isActive) {
         //TODO probably validate some things
         char[] blankArr = new char[BOARD_SIZE*BOARD_SIZE];
         char[] worms = new char[BOARD_SIZE * BOARD_SIZE];
@@ -106,7 +106,7 @@ public class BoardService {
                 }
             }
         }
-        findDestroyedWorms(worms, originalWorms);
+        //findDestroyedWorms(worms, originalWorms);
         String winner = null;
         if(gameOver(myBoard.getId())) winner = myBoard.getUser().getUsername();
         if(gameOver(oppBoard.getId())) winner = oppBoard.getUser().getUsername();
@@ -138,7 +138,7 @@ public class BoardService {
                 flag = true;
                 while (flag || curr >= i) {
                     if (hit) {
-                        hitWorms[curr] = '#';
+                        hitWorms[curr] = (char) (originalWorms[curr] + 100);
                         if (endMarker) break;
                     } else {
                         if (!flag) hitWorms[curr] = hitWormsClone[curr];

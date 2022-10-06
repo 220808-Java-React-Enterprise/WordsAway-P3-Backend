@@ -366,6 +366,8 @@ public class BoardServiceTest {
 
         boardService.findDestroyedWorms(localWorms, clone);
 
+//        System.out.println((char)(localWorms[39] - 100));
+//
 //        int counter = 0;
 //        for (int i = 0; i < BOARD_SIZE; i++) {
 //            for (int j = 0; j < BOARD_SIZE; j++)
