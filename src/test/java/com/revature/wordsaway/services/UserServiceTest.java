@@ -543,9 +543,9 @@ class UserServiceTest {
     }
 
     //TODO: add more test for settingsUpdateUser method.
-    @Test void test_SettingsUpdateUser_InvalidEmail_fail(){
+    @Test void test_SettingsUpdateUser_IncorrectCurrentPassword_fail(){
 
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(AuthenticationException.class, () -> {
             when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
             when(mockUserRepo.findUserByEmail(any())).thenReturn(mockUser);
             UserService.settingsUpdateUser("Name", "email", "password", "password");
