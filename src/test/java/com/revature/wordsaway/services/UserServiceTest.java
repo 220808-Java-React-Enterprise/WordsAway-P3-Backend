@@ -542,4 +542,14 @@ class UserServiceTest {
         assertEquals(userService.getRankByElo("test", mockRankList), 6);
     }
 
+    //TODO: add more test for settingsUpdateUser method.
+    @Test void test_SettingsUpdateUser_InvalidEmail_fail(){
+
+        assertThrows(InvalidRequestException.class, () -> {
+            when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+            when(mockUserRepo.findUserByEmail(any())).thenReturn(mockUser);
+            UserService.settingsUpdateUser("Name", "email", "password", "password");
+        } );
+    }
+
 }

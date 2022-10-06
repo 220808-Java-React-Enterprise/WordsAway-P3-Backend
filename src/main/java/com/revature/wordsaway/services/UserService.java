@@ -237,22 +237,16 @@ public class UserService {
 
     public static void settingsUpdateUser(String username, String email, String currentPassword, String newPassword){
 
+        User user = userRepository.findUserByUsername(username);
+
+        if(!currentPassword.equals(user.getPassword())){ throw new AuthenticationException("Incorrect password."); }
+        if(!(newPassword == null)) user.setPassword(newPassword);
         if(email != null && !email.equals("")){
             validateEmail(email);
             checkAvailableEmail(email);
-        }
-        else {  throw new InvalidRequestException("Email is invalid or already linked to an account. Please use a different email."); }
-
-        User user = userRepository.findUserByUsername(username);
-
-        if(currentPassword.equals(user.getPassword())){
-            if(!(email == null)) user.setEmail(email);
-            if(!(newPassword == null)) user.setPassword(newPassword);
-        }
-        else{
-            throw new AuthenticationException("incorrect password.");
-
+            user.setEmail(email);
         }
 
+        userRepository.save(user);
     }
 }
