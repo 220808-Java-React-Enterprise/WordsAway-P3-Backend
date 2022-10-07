@@ -17,13 +17,18 @@ public class Message {
     @Column(name = "message", nullable = false)
     private String message;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name="chat", referencedColumnName = "id")
+    Chat chat;
+
     protected Message(){}
 
-    public Message(UUID id, User user, Timestamp created, String message) {
+    public Message(UUID id, User user, Timestamp created, String message, Chat chat) {
         this.id = id;
         this.user = user;
         this.created = created;
         this.message = message;
+        this.chat = chat;
     }
 
     public UUID getId() {
@@ -40,6 +45,14 @@ public class Message {
 
     public String getMessage() {
         return message;
+    }
+
+    public Chat getChat() {
+        return chat;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
@@ -548,7 +549,11 @@ class UserServiceTest {
         assertThrows(AuthenticationException.class, () -> {
             when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
             when(mockUserRepo.findUserByEmail(any())).thenReturn(mockUser);
-            UserService.settingsUpdateUser("Name", "email", "password", "password");
+            UpdateUserRequest mockRequest2 = mock(UpdateUserRequest.class);
+            when(mockRequest2.getCurrentPassword()).thenReturn("password");
+            when(mockRequest2.getCurrentPassword()).thenReturn("password");
+            when(mockRequest2.getEmail()).thenReturn("username@email.com");
+            UserService.settingsUpdateUser("Name", mockRequest2);
         } );
     }
 

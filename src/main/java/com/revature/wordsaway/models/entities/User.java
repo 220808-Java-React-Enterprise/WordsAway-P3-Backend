@@ -1,6 +1,5 @@
 package com.revature.wordsaway.models.entities;
 
-
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,11 +28,11 @@ public class User {
     @Column(name = "is_cpu", nullable = false)
     private boolean isCPU;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "friend_name"))
     private Set<User> friends = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "chats_jnc", joinColumns = @JoinColumn(name = "username"), inverseJoinColumns = @JoinColumn(name = "chat"))
     private Set<Chat> chats = new HashSet<>();
 
@@ -59,12 +58,20 @@ public class User {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getSalt() {
         return salt;
     }
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public int getAvatar(){
@@ -103,14 +110,10 @@ public class User {
         return friends;
     }
 
-    //Delg v2
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    //Don't uncomment this. It causes a StackOverflow.
+    /*public Set<Chat> getChats() {
+        return chats;
+    }*/
 
     @Override
     public boolean equals(Object obj) {
@@ -132,6 +135,7 @@ public class User {
                 ", password='" + password + '\'' +
                 ", salt='" + salt + '\'' +
                 ", email='" + email + '\'' +
+                ", avatar=" + avatar +
                 ", elo=" + elo +
                 ", gamesPlayed=" + gamesPlayed +
                 ", gamesWon=" + gamesWon +
