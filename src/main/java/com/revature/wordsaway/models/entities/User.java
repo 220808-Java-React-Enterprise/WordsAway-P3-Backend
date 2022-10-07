@@ -78,6 +78,10 @@ public class User {
         return avatar;
     }
 
+    public void setAvatar(int avatar) {
+        this.avatar = avatar;
+    }
+
     public float getELO() {
         return elo;
     }

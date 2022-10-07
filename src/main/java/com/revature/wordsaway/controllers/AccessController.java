@@ -36,10 +36,10 @@ public class AccessController {
     @PostMapping(value = "/login", consumes = "application/json")
     public UserResponse login(@RequestBody LoginRequest request, HttpServletResponse resp) {
         try {
+            User user = UserService.getByUsername(request.getUsername());
             String token = UserService.login(request);
             resp.setHeader("Authorization", token);
             resp.setHeader("Access-Control-Expose-Headers", "Authorization");
-            User user = UserService.getByUsername(request.getUsername());
             return new UserResponse(
                     user.getUsername(),
                     user.getELO(),
