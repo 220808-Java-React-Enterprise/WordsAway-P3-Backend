@@ -247,6 +247,8 @@ public class UserService {
                 checkAvailableEmail(request.getEmail());
                 user.setEmail(request.getEmail());
             }
+            if (request.getAvatarIdx() != user.getAvatar())
+                user.setAvatar(request.getAvatarIdx());
 
             userRepository.save(user);
         }

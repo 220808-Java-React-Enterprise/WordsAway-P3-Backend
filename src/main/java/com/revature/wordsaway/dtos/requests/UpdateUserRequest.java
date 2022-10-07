@@ -4,6 +4,7 @@ public class UpdateUserRequest {
     private String currentPassword;
     private String newPassword;
     private String email;
+    private int avatarIdx;
 
     public String getCurrentPassword() {
         return currentPassword;
@@ -17,12 +18,15 @@ public class UpdateUserRequest {
         return email;
     }
 
+    public int getAvatarIdx() {return avatarIdx;}
+
     @Override
     public String toString() {
         return "UpdateUserRequest{" +
                 "currentPassword='" + currentPassword + '\'' +
                 ", newPassword='" + newPassword + '\'' +
                 ", email='" + email + '\'' +
+                ", avatarIdx='" + avatarIdx + '\'' +
                 '}';
     }
 }
