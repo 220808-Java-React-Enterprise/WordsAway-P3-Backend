@@ -1,5 +1,6 @@
 package com.revature.wordsaway.controllers;
 
+import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
@@ -151,10 +152,10 @@ public class UserController {
 
     @CrossOrigin
     @PutMapping(value = "/settings/updateUser", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String settingsUpdateUser(@RequestBody String currentPassword, String email, String newPassword, HttpServletRequest req, HttpServletResponse resp){
+    public String settingsUpdateUser(@RequestBody UpdateUserRequest request, HttpServletRequest req, HttpServletResponse resp){
         try{
             User user = TokenService.extractRequesterDetails(req);
-            UserService.settingsUpdateUser(user.getUsername(), email, currentPassword, newPassword);
+            UserService.settingsUpdateUser(user.getUsername(), request);
             return "Settings updated!";
 
         }

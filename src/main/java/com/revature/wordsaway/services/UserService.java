@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
@@ -235,16 +236,16 @@ public class UserService {
         throw new NotFoundException("Username not found in the rankings list. Please refresh and try again. If problem persists please contact us.");
     }
 
-    public static void settingsUpdateUser(String username, String email, String currentPassword, String newPassword){
+    public static void settingsUpdateUser(String username, UpdateUserRequest request){
 
         User user = userRepository.findUserByUsername(username);
 
-        if(currentPassword.equals(user.getPassword())){
-            if (newPassword != null && !newPassword.equals("")) user.setPassword(newPassword);
-            if (email != null && !email.equals("")) {
-                validateEmail(email);
-                checkAvailableEmail(email);
-                user.setEmail(email);
+        if(request.getCurrentPassword().equals(user.getPassword())){
+            if (request.getNewPassword() != null && !request.getNewPassword().equals("")) user.setPassword(request.getNewPassword());
+            if (request.getEmail() != null && !request.getEmail().equals("")) {
+                validateEmail(request.getEmail());
+                checkAvailableEmail(request.getEmail());
+                user.setEmail(request.getEmail());
             }
 
             userRepository.save(user);
