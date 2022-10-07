@@ -13,7 +13,7 @@ public class MainDriver {
         try {
             port = Integer.parseInt(System.getenv("PORT"));
         } catch (NumberFormatException nfe) {
-            port = 9000;
+            port = 443;
         }
         ChatServer cs = new ChatServer(port);
         cs.start();
