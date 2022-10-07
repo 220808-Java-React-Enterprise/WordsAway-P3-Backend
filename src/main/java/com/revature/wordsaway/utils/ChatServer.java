@@ -7,7 +7,6 @@ import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.ChatService;
 import com.revature.wordsaway.services.UserService;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
-import com.sun.media.jfxmediaimpl.HostUtils;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.WebSocket;
