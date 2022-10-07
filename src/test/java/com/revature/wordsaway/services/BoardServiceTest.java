@@ -2,9 +2,9 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
 import com.revature.wordsaway.dtos.responses.GameResponse;
-import com.revature.wordsaway.models.GameState;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
+import com.revature.wordsaway.models.enums.GameState;
 import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import org.junit.jupiter.api.*;
