@@ -28,7 +28,7 @@ public class ChatServer extends WebSocketServer {
         conns = new HashSet<>();
         users = new HashMap<>();
         chats = new HashMap<>();
-        System.out.println("Chat Server on Port " + port + " Initiated.");
+        System.out.println("Chat Server on Port " + port + " Initiated at address " + this.getAddress() + ".");
     }
 
     @Override
