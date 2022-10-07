@@ -1,9 +1,5 @@
 package com.revature.wordsaway.models.entities;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jdk.nashorn.internal.objects.annotations.Getter;
-
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,12 +58,20 @@ public class User {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getSalt() {
         return salt;
     }
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public int getAvatar(){

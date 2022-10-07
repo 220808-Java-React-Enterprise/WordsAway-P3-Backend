@@ -39,7 +39,7 @@ public class AIServiceTest {
         tray[4] = 'R';
         tray[5] = 'H';
         tray[6] = 'N';
-        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null);
+        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null, "PRACTICE");
 
         mockRepo = mock(BoardRepository.class);
         boardService = new BoardService(mockRepo);
