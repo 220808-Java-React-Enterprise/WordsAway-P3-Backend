@@ -160,7 +160,8 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         super.handleTransportError(session, exception);
         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + exception + "\"}"));
-        System.out.println(exception);
+        exception.printStackTrace();
+        System.out.println(exception.getMessage());
     }
 
     private static class MessageStub{

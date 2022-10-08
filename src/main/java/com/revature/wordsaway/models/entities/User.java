@@ -136,15 +136,11 @@ public class User {
     public String toString() {
         return "User{" +
                 "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", salt='" + salt + '\'' +
-                ", email='" + email + '\'' +
                 ", avatar=" + avatar +
                 ", elo=" + elo +
                 ", gamesPlayed=" + gamesPlayed +
                 ", gamesWon=" + gamesWon +
                 ", isCPU=" + isCPU +
-                ", friends=" + friends +
                 '}';
     }
 }
