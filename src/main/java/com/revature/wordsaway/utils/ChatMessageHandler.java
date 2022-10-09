@@ -20,10 +20,9 @@ import java.util.*;
 
 @Component
 public class ChatMessageHandler extends TextWebSocketHandler {
-    private HashMap<User, WebSocketSession> users = new HashMap<>();
-
-    private HashMap<UUID, Set<User>> chats = new HashMap<>();
-    private List<WebSocketSession> webSocketSessions = Collections.synchronizedList(new ArrayList<>());
+    private final HashMap<User, WebSocketSession> users = new HashMap<>();
+    private final HashMap<UUID, Set<User>> chats = new HashMap<>();
+    private final List<WebSocketSession> webSocketSessions = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -159,9 +158,24 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         super.handleTransportError(session, exception);
-        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + exception + "\"}"));
+        //session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + exception + "\"}"));
         exception.printStackTrace();
         System.out.println(exception.getMessage());
+    }
+
+    public void sendNotification(User user, String message){
+        if(users.containsKey(user)){
+            try {
+                users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"NOTIFICATION\", \"data\":\"" + message + "\"}"));
+            }catch (IOException e){
+                e.printStackTrace();
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public HashMap<User, WebSocketSession> getUsers(){
+        return users;
     }
 
     private static class MessageStub{

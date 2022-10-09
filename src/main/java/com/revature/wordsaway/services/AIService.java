@@ -54,7 +54,7 @@ public class AIService {
             WordAndLocation wl = finalList.get(rand.nextInt(finalList.size()));
             temp++;
             finalizeMove(wl, increment);
-            System.out.println(wl);
+            //System.out.println(wl);
         }
         return board;
     }

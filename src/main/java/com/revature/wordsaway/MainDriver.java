@@ -7,16 +7,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MainDriver {
     public static void main(String[] args) {
         SpringApplication.run(MainDriver.class, args);
-/*
-        int port;
-        try {
-            port = Integer.parseInt(System.getenv("PORT"));
-        } catch (NumberFormatException nfe) {
-            port = 9000;
-        }
-        ChatServer cs = new ChatServer(port);
-        cs.start();
-    }
- */
     }
 }
