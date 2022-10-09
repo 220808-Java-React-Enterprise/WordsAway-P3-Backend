@@ -10,9 +10,13 @@ import com.revature.wordsaway.services.AIService;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
+import com.revature.wordsaway.utils.ChatMessageHandler;
+import com.revature.wordsaway.utils.WebSocketConfig;
 import com.revature.wordsaway.utils.customExceptions.ForbiddenException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +33,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping
 public class GameController {
-    private final ConcurrentHashMap<UUID, SseEmitter> subscribedBoards = new ConcurrentHashMap<>(); 
-    
+    private final ConcurrentHashMap<UUID, SseEmitter> subscribedBoards = new ConcurrentHashMap<>();
+    @Autowired
+    private ApplicationContext appContext;
+
+
+
     @CrossOrigin
     @PostMapping(value = "/makeGame", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -38,6 +46,9 @@ public class GameController {
         try {
             User user = TokenService.extractRequesterDetails(req);
             User opponent = UserService.getByUsername(request.getUsername());
+            //TODO find less hacky way to do this
+            ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
+            wsHandler.sendNotification(opponent, user + " has challenged you to a game.");
             if(user.getUsername().equals(opponent.getUsername())) throw new InvalidRequestException("You can not challenge yourself to a game. Nice try though.");
             for(OpponentResponse o : UserService.getAllOpponents(user.getUsername())){
                 if(o.getUsername().equals(opponent.getUsername()) && o.getBoard_id() != null)
@@ -45,7 +56,6 @@ public class GameController {
             }
 
             if(type == null) type = "PRACTICE";
-
             UUID uuid = UUID.randomUUID();
             BoardService.register(opponent, uuid, !opponent.isCPU(), type.toUpperCase());
             Board board = BoardService.register(user, uuid, opponent.isCPU(), type.toUpperCase());
@@ -139,6 +149,10 @@ public class GameController {
                 emitter.send(SseEmitter.event().name("active").data("active"));
                 emitter.complete();
                 subscribedBoards.remove(opposingBoard.getId());
+            }else{
+                //TODO find less hacky way to do this
+                ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
+                wsHandler.sendNotification(opponent, user + " has made their move.");
             }
             return "Move made.";
         }catch (NetworkException e){
@@ -206,5 +220,4 @@ public class GameController {
             return e.getMessage();
         }
     }
-
 }
