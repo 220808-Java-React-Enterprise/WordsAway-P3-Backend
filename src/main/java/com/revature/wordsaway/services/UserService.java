@@ -240,6 +240,9 @@ public class UserService {
 
         User user = userRepository.findUserByUsername(username);
 
+        if (request.getAvatarIdx() != user.getAvatar())
+            user.setAvatar(request.getAvatarIdx());
+
         if(request.getCurrentPassword().equals(user.getPassword())){
             if (request.getNewPassword() != null && !request.getNewPassword().equals("")) user.setPassword(request.getNewPassword());
             if (request.getEmail() != null && !request.getEmail().equals("")) {
@@ -247,11 +250,9 @@ public class UserService {
                 checkAvailableEmail(request.getEmail());
                 user.setEmail(request.getEmail());
             }
-            if (request.getAvatarIdx() != user.getAvatar())
-                user.setAvatar(request.getAvatarIdx());
+        } else if ((request.getEmail() != null && !request.getEmail().equals("")) || (request.getNewPassword() != null && !request.getNewPassword().equals("")))
+            throw new AuthenticationException("Invalid current password.");
 
-            userRepository.save(user);
-        }
-        else { throw new AuthenticationException("Incorrect password."); }
+        userRepository.save(user);
     }
 }
