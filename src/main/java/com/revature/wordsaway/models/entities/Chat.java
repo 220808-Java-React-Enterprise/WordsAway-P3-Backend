@@ -2,6 +2,7 @@ package com.revature.wordsaway.models.entities;
 
 import jdk.nashorn.internal.objects.annotations.Getter;
 
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
