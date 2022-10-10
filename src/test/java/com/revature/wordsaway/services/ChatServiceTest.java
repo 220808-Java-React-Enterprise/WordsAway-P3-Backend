@@ -8,13 +8,12 @@ import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.ChatRepository;
 import com.revature.wordsaway.repositories.MessageRepository;
 import com.revature.wordsaway.repositories.UserRepository;
+import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,16 +24,26 @@ class ChatServiceTest {
 
     private ChatRepository mockChatRepository;
     private MessageRepository mockMessageRepository;
-
     private ChatService chatService;
 
+    private Chat chat;
 
+    private Message message;
+
+    private User user;
+
+    private Timestamp timeStamp;
 
     @BeforeEach
     public void setup() {
         mockChatRepository = mock(ChatRepository.class);
         mockMessageRepository = mock(MessageRepository.class);
         chatService = new ChatService(mockChatRepository, mockMessageRepository);
+
+        user = new User("chuong@gmail.com", "password", "salt", "chuong@gmail.com", 3, 3.2f, 10, 10, true, new HashSet<>());
+        chat = new Chat(UUID.randomUUID(), new ArrayList<Message>(), new HashSet<>());
+        this.timeStamp = new Timestamp(System.currentTimeMillis());
+        message = new Message(UUID.randomUUID(), user,timeStamp, "Hello World!", chat);
 
 //        mockUserRepo = mock(UserRepository.class);
 //        mockBoardRepo = mock(BoardRepository.class);
@@ -51,23 +60,33 @@ class ChatServiceTest {
     }
 
     @Test
-    void register() {
-        Chat c = new Chat(UUID.randomUUID(), new ArrayList<Message>(), new HashSet<>());
-        when(mockChatRepository.save(c)).thenReturn(c);
-        chatService.register(c);
-        verify(mockChatRepository, times(1)).save(c);
+    void test_register_and_verify_mockChatRepository() {
+        when(mockChatRepository.save(chat)).thenReturn(chat);
+        chatService.register(chat);
+        verify(mockChatRepository, times(1)).save(chat);
     }
 
     @Test
-    void addMessage() {
-        Chat c = new Chat(UUID.randomUUID(), new ArrayList<Message>(), new HashSet<>());
-        Message message = new Message();
-        when(mockChatRepository.save(c)).thenReturn(c);
-        when(mockMessageRepository.save(c)).thenReturn(c);
+    void test_addMessage_and_verify_messageRepository() {
+        when(mockChatRepository.save(chat)).thenReturn(chat);
+        when(mockMessageRepository.save(message)).thenReturn(message);
+        chatService.addMessage(chat, message);
+        verify(mockMessageRepository, times(1)).save(message);
     }
 
     @Test
-    void update() {
+    void test_addMessage_and_verify_chatRepository() {
+        when(mockChatRepository.save(chat)).thenReturn(chat);
+        when(mockMessageRepository.save(message)).thenReturn(message);
+        chatService.addMessage(chat, message);
+        verify(mockChatRepository, times(1)).save(chat);
+    }
+
+    @Test
+    void test_update_and_verify_mockChatRepository() {
+        when(mockChatRepository.save(chat)).thenReturn(chat);
+        chatService.update(chat);
+        verify(mockChatRepository, times(1)).save(chat);
     }
 
     @Test
