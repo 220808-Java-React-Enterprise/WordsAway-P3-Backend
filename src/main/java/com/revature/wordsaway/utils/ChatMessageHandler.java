@@ -48,6 +48,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                 case "LOGIN": {
                     try {
                         User user = UserService.getByUsername(stub.getUser());
+                        users.remove(user);
                         users.put(user, session);
                         System.out.println("User " + stub.getUser() + " logged in.");
                         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"LOGIN_ACK\", \"data\":\"\"}"));
@@ -55,7 +56,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                             chats.put(c.getId(), c.getUsers());
                             session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + c.getId() + "\", \"type\":\"START_CHAT\", \"data\":\"\"}"));
                             for (Message m : c.getMessages()) {
-                                session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + c.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
+                                session.sendMessage(new TextMessage("{\"user\":\"" + m.getUser().getUsername() + "\", \"id\":\"" + c.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
                             }
                         }
                     } catch (Exception e) {
