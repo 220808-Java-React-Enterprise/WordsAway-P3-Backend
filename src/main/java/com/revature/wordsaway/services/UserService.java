@@ -251,10 +251,10 @@ public class UserService {
                 checkAvailableEmail(request.getEmail());
                 user.setEmail(request.getEmail());
             }
-        } else if (!oldPassword && (newEmail || newPassword))
-            throw new AuthenticationException("Invalid current password.");
-        else if (request.getAvatarIdx() != user.getAvatar())
+        } else if (request.getAvatarIdx() != user.getAvatar())
             user.setAvatar(request.getAvatarIdx());
+        else if (!oldPassword && (newEmail || newPassword))
+            throw new AuthenticationException("Invalid current password.");
         else
             throw new ResourceConflictException("No change to account");
 
