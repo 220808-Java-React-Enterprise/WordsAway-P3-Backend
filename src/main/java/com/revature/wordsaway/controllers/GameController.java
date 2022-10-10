@@ -162,7 +162,7 @@ public class GameController {
             }else{
                 //TODO find less hacky way to do this
                 ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
-                wsHandler.sendNotification(opponent, user + " has made their move.");
+                wsHandler.sendNotification(opponent, user.getUsername() + " has made their move.");
             }
             return "Move made.";
         }catch (NetworkException e){
@@ -222,7 +222,7 @@ public class GameController {
             if(!BoardService.gameOver(opposingBoard.getId()) && !BoardService.gameOver(board.getId()))
                 throw new InvalidRequestException("You can not end a game that is still in progress.");
             //TODO possibly allow for surrendering.
-            BoardService.endGame(board.getGameID());
+            //BoardService.endGame(board.getGameID());
             return "Game Ended";
         }catch(NetworkException e){
             resp.setStatus(e.getStatusCode());

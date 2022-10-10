@@ -123,14 +123,14 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/gameHistory", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<Board> getGameHistory (@RequestParam(required = false) String username, HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody String getGameHistory (@RequestParam(required = false) String username, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
-            return BoardService.getAllByUsername(username != null ? username : user.getUsername());
+            return BoardService.getAllByUsername(username != null ? username : user.getUsername()).toString();
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
-            return new ArrayList<Board>();
+            return new ArrayList<Board>().toString();
         }
     }
 
