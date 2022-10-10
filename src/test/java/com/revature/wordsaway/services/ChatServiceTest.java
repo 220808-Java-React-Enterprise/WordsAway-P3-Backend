@@ -50,18 +50,6 @@ class ChatServiceTest {
         messageList.add(message);
         chat = new Chat(UUID.randomUUID(), messageList, new HashSet<>());
 
-//        mockUserRepo = mock(UserRepository.class);
-//        mockBoardRepo = mock(BoardRepository.class);
-//        userService = new UserService(mockUserRepo, mockBoardRepo);
-//        mockRequest = mock(NewUserRequest.class);
-//        when(mockRequest.getUsername()).thenReturn("username");
-//        when(mockRequest.getPassword()).thenReturn("password");
-//        when(mockRequest.getEmail()).thenReturn("username@email.com");
-//        when(mockRequest.getSalt()).thenReturn("00000000000000000000000000000000");
-//        tokenServiceMockedStatic = mockStatic(TokenService.class);
-//        tokenServiceMockedStatic.when(() -> TokenService.generateToken(any())).thenReturn("testtoken");
-//        mockUser = mock(User.class);
-
     }
 
     @Test
@@ -96,7 +84,6 @@ class ChatServiceTest {
 
     @Test
     void test_delete_and_verify_mockChatRepository() {
-        //chatRepository.delete(chat);
         doNothing().when(mockChatRepository).delete(chat);
         chatService.delete(chat);
         verify(mockChatRepository, times(1)).delete(chat);
@@ -104,7 +91,6 @@ class ChatServiceTest {
 
     @Test
     void test_getByID() {
-        // chatRepository.findByID(id);
         UUID uid = UUID.randomUUID();
         when(mockChatRepository.findByID(uid)).thenReturn(chat);
         Chat c = chatService.getByID(uid);
@@ -112,7 +98,7 @@ class ChatServiceTest {
     }
 
     @Test
-    void getChatsByUsername() {
+    void test_getChatsByUsername() {
         List<Chat> chatList = new ArrayList<>();
         chatList.add(chat);
         when(mockChatRepository.findByUsername("chuong@gmail.com")).thenReturn(chatList);
