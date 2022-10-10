@@ -240,18 +240,23 @@ public class UserService {
 
         User user = userRepository.findUserByUsername(username);
 
-        if (request.getAvatarIdx() != user.getAvatar())
-            user.setAvatar(request.getAvatarIdx());
+        boolean newEmail = request.getEmail() != null && !request.getEmail().equals(""),
+                newPassword = request.getNewPassword() != null && !request.getNewPassword().equals(""),
+                oldPassword = request.getCurrentPassword().equals(user.getPassword());
 
-        if(request.getCurrentPassword().equals(user.getPassword())){
+        if(oldPassword && (newEmail || newPassword)){
             if (request.getNewPassword() != null && !request.getNewPassword().equals("")) user.setPassword(request.getNewPassword());
             if (request.getEmail() != null && !request.getEmail().equals("")) {
                 validateEmail(request.getEmail());
                 checkAvailableEmail(request.getEmail());
                 user.setEmail(request.getEmail());
             }
-        } else if ((request.getEmail() != null && !request.getEmail().equals("")) || (request.getNewPassword() != null && !request.getNewPassword().equals("")))
+        } else if (!oldPassword && (newEmail || newPassword))
             throw new AuthenticationException("Invalid current password.");
+        else if (request.getAvatarIdx() != user.getAvatar())
+            user.setAvatar(request.getAvatarIdx());
+        else
+            throw new ResourceConflictException("No change to account");
 
         userRepository.save(user);
     }
