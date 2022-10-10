@@ -6,13 +6,18 @@ import com.revature.wordsaway.dtos.responses.GameResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
+import com.revature.wordsaway.models.enums.GameState;
 import com.revature.wordsaway.services.AIService;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
+import com.revature.wordsaway.utils.ChatMessageHandler;
+import com.revature.wordsaway.utils.WebSocketConfig;
 import com.revature.wordsaway.utils.customExceptions.ForbiddenException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +36,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping
 public class GameController {
-    private final ConcurrentHashMap<UUID, SseEmitter> subscribedBoards = new ConcurrentHashMap<>(); 
-    
+    private final ConcurrentHashMap<UUID, SseEmitter> subscribedBoards = new ConcurrentHashMap<>();
+    @Autowired
+    private ApplicationContext appContext;
+
+
+
     @CrossOrigin
     @PostMapping(value = "/makeGame", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -38,6 +49,9 @@ public class GameController {
         try {
             User user = TokenService.extractRequesterDetails(req);
             User opponent = UserService.getByUsername(request.getUsername());
+            //TODO find less hacky way to do this
+            ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
+            wsHandler.sendNotification(opponent, user + " has challenged you to a game.");
             if(user.getUsername().equals(opponent.getUsername())) throw new InvalidRequestException("You can not challenge yourself to a game. Nice try though.");
             for(OpponentResponse o : UserService.getAllOpponents(user.getUsername())){
                 if(o.getUsername().equals(opponent.getUsername()) && o.getBoard_id() != null)
@@ -45,7 +59,6 @@ public class GameController {
             }
 
             if(type == null) type = "PRACTICE";
-
             UUID uuid = UUID.randomUUID();
             BoardService.register(opponent, uuid, !opponent.isCPU(), type.toUpperCase());
             Board board = BoardService.register(user, uuid, opponent.isCPU(), type.toUpperCase());
@@ -122,13 +135,20 @@ public class GameController {
             BoardService.makeMove(request, board);
             Board opposingBoard = BoardService.getOpposingBoard(board);
             User opponent = opposingBoard.getUser();
-            if (BoardService.gameOver(request.getBoardID()) && board.getType().toUpperCase().equals("RANKED")){
-                user.setELO(BoardService.calculateELO(user.getELO(), opponent.getELO(), true));
+            if (BoardService.gameOver(request.getBoardID())){
+                board.setGameState(GameState.WIN);
+                board.setCompleted(Timestamp.from(Instant.now()));
+                if(board.getType().equalsIgnoreCase("RANKED")) user.setELO(BoardService.calculateELO(user.getELO(), opponent.getELO(), true));
                 user.setGamesPlayed(user.getGamesPlayed() + 1);
                 user.setGamesWon(user.getGamesWon() + 1);
                 UserService.update(user);
-                if(!opponent.isCPU()) opponent.setELO(BoardService.calculateELO(opponent.getELO(), user.getELO(), false));
+                BoardService.update(board);
+                if(!opponent.isCPU() && board.getType().equalsIgnoreCase("RANKED"))
+                    opponent.setELO(BoardService.calculateELO(opponent.getELO(), user.getELO(), false));
                 opponent.setGamesPlayed(opponent.getGamesPlayed() + 1);
+                opposingBoard.setGameState(GameState.LOSE);
+                opposingBoard.setCompleted(Timestamp.from(Instant.now()));
+                BoardService.update(opposingBoard);
                 UserService.update(opponent);
             }else if (opponent.isCPU()) {
                 cpuMakeMove(board, opposingBoard);
@@ -139,6 +159,10 @@ public class GameController {
                 emitter.send(SseEmitter.event().name("active").data("active"));
                 emitter.complete();
                 subscribedBoards.remove(opposingBoard.getId());
+            }else{
+                //TODO find less hacky way to do this
+                ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
+                wsHandler.sendNotification(opponent, user + " has made their move.");
             }
             return "Move made.";
         }catch (NetworkException e){
@@ -206,5 +230,4 @@ public class GameController {
             return e.getMessage();
         }
     }
-
 }

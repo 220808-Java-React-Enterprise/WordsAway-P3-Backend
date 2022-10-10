@@ -119,12 +119,20 @@ public class Board implements Cloneable{
         return gameState;
     }
 
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
+
     public boolean isActive(){
         return gameState == GameState.YOUR_TURN;
     }
 
     public Timestamp getCompleted(){
         return completed;
+    }
+
+    public void setCompleted(Timestamp completed) {
+        this.completed = completed;
     }
 
     public char[] getRow(int index){
