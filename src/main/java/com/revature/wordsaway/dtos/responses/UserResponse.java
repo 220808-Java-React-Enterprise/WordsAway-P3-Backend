@@ -35,4 +35,15 @@ public class UserResponse {
     public int getAvatar(){
         return avatar;
     }
+
+    @Override
+    public String toString() {
+        return "UserResponse{" +
+                "username='" + username + '\'' +
+                ", elo=" + elo +
+                ", gamesPlayed=" + gamesPlayed +
+                ", gamesWon=" + gamesWon +
+                ", avatar=" + avatar +
+                '}';
+    }
 }
