@@ -1,5 +1,6 @@
 package com.revature.wordsaway.controllers;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
+import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
@@ -29,5 +30,33 @@ public class LobbyController {
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/getTopTenElo", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody List<UserResponse> getTopTenByElo(HttpServletRequest req, HttpServletResponse resp){
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            return UserService.getTopTenByElo();
+        }catch(NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/getRankingsElo", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody List<UserResponse> getRankingsByElo(HttpServletRequest req, HttpServletResponse resp){
+        try {
+            User user = TokenService.extractRequesterDetails(req);
+            return UserService.getRankingsByELO();
+        }catch(NetworkException e){
+            resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            return null;
+        }
+
     }
 }

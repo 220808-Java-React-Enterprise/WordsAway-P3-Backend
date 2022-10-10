@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
@@ -451,7 +452,7 @@ class UserServiceTest {
         assertNotNull(friend);
     }
 
-    @Test void test_GetFriendsList_CorrectUsername_succed(){
+    @Test void test_GetFriendsList_CorrectUsername_succeed(){
         ArrayList<String> mockFriendNames = new ArrayList<String>();
         mockFriendNames.add("Friend1");
         mockFriendNames.add("Friend2");
@@ -465,6 +466,107 @@ class UserServiceTest {
 
         Map<String, List<UserResponse>> friendsList = userService.getFriendsList("username");
         assertNotNull(friendsList);
+    }
+
+    @Test void test_GetTopTenByElo_AtLeastTen_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        when(mockUserRepo.getTopTenInElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getTopTenByElo().size(), 10);
 
     }
+
+
+    @Test void test_GetTopTenByElo_Zero_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        when(mockUserRepo.getTopTenInElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getTopTenByElo().size(), 0);
+
+    }
+
+    @Test void test_GetRankingsByElo_SizeEqualsTen_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 10);
+    }
+
+
+    @Test void test_GetRankingsByElo_CheckRankConsistency_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        mockUserNames.add(mockUser);
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 10);
+    }
+
+    @Test void test_GetRankingsByElo_SizeEqualsZero_succeed(){
+
+        ArrayList<User> mockUserNames = new ArrayList<>();
+        when(mockUserRepo.getAllOrderByElo()).thenReturn(mockUserNames);
+
+        assertEquals(userService.getRankingsByELO().size(), 0);
+    }
+
+    @Test void test_GetRankByElo_RankExists_succeed(){
+        UserResponse testUser = new UserResponse("test", 1.0f, 2, 1, 0);
+        UserResponse mockUserResponse = new UserResponse("Mock", 1.0f, 1, 1, 0);
+        ArrayList<UserResponse> mockRankList = new ArrayList<>();
+        mockRankList.add(mockUserResponse);
+        mockRankList.add(mockUserResponse);
+        mockRankList.add(mockUserResponse);
+        mockRankList.add(mockUserResponse);
+        mockRankList.add(mockUserResponse);
+        mockRankList.add(testUser);
+        assertEquals(userService.getRankByElo("test", mockRankList), 6);
+    }
+
+    //TODO: add more test for settingsUpdateUser method.
+    @Test void test_SettingsUpdateUser_IncorrectCurrentPassword_fail(){
+
+        assertThrows(AuthenticationException.class, () -> {
+            when(mockUserRepo.findUserByUsername(any())).thenReturn(mockUser);
+            when(mockUserRepo.findUserByEmail(any())).thenReturn(mockUser);
+            UpdateUserRequest mockRequest2 = mock(UpdateUserRequest.class);
+            when(mockRequest2.getCurrentPassword()).thenReturn("password");
+            when(mockRequest2.getCurrentPassword()).thenReturn("password");
+            when(mockRequest2.getEmail()).thenReturn("username@email.com");
+            UserService.settingsUpdateUser("Name", mockRequest2);
+        } );
+    }
+
 }

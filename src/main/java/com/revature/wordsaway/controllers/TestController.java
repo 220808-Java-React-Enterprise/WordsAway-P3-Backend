@@ -37,8 +37,8 @@ public class TestController {
         try {
             List<Board> boards = new ArrayList<>();
             UUID uuid = UUID.randomUUID();
-            boards.add(BoardService.register(UserService.getByUsername("RJamesRJ"), uuid, true));
-            boards.add(BoardService.register(UserService.getByUsername("Easy-Bot"), uuid, false));
+            boards.add(BoardService.register(UserService.getByUsername("RJamesRJ"), uuid, true, "PRACTICE"));
+            boards.add(BoardService.register(UserService.getByUsername("Easy-Bot"), uuid, false, "PRACTICE"));
             return boards.toString();
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());

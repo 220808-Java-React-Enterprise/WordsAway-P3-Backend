@@ -1,7 +1,7 @@
 package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.BoardRequest;
-import com.revature.wordsaway.models.GameState;
+import com.revature.wordsaway.models.enums.GameState;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.BoardRepository;
@@ -23,7 +23,6 @@ public class AIServiceTest {
     private Board mockBoard;
     private Board newBoard;
     private AIService aiService;
-    private MockedStatic<AnagramService> mockAnagram;
     private BoardRequest request;
     private final char[] letters = new char[BOARD_SIZE * BOARD_SIZE];
     private final char[] worms = new char[BOARD_SIZE * BOARD_SIZE];
@@ -33,16 +32,20 @@ public class AIServiceTest {
     public void setupTest(){
         Arrays.fill(letters, '.');
         Arrays.fill(worms, '.');
-        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null);
-
+        tray[0] = 'A';
+        tray[1] = 'U';
+        tray[2] = 'P';
+        tray[3] = 'E';
+        tray[4] = 'R';
+        tray[5] = 'H';
+        tray[6] = 'N';
+        newBoard = new Board(UUID.randomUUID(), mock(User.class), tray, 0, worms, letters, UUID.randomUUID(), GameState.YOUR_TURN, null, "PRACTICE");
 
         mockRepo = mock(BoardRepository.class);
         boardService = new BoardService(mockRepo);
 
         mockBoard = mock(Board.class);
-        when(mockBoard.getLetters()).thenReturn(letters);
-        when(mockBoard.getWorms()).thenReturn(worms);
-
+        when(mockBoard.getTray()).thenReturn(tray);
         request = mock(BoardRequest.class);
 
         aiService = new AIService();
@@ -57,7 +60,6 @@ public class AIServiceTest {
         mockBoard = null;
         newBoard = null;
         aiService = null;
-        mockAnagram = null;
         request = null;
     }
 
@@ -104,95 +106,90 @@ public class AIServiceTest {
     }
 
     @Test
-    public void test_easyBot_emptyBoard(){
-        Board blank = mock(Board.class);
-        mockAnagram = mockStatic(AnagramService.class);
-        mockAnagram.when(() -> AnagramService.isWord(any())).thenReturn(true);
+    public void testStart_firstMove(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
 
-        tray = "TESTING".toCharArray();
-        newBoard.setTray(tray);
         aiService.setRandomSeed(0);
-
-        mockAnagram.when(() -> AnagramService.getAllList(anyString(), anyString(), anyInt())).thenReturn(Arrays.asList("TESTING"));
-        newBoard = AIService.start(System.currentTimeMillis(), newBoard);
+        aiService.start(System.currentTimeMillis(), newBoard);
 
         when(request.getLayout()).thenReturn(newBoard.getLetters());
-        when(mockRepo.findBoardByID(any())).thenReturn(blank);
-        when(blank.getLetters()).thenReturn(setupBlankBoard());
-        when(blank.getTray()).thenReturn(newBoard.getTray());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBlankBoard());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
 
         boardService.validateMove(request);
-        mockAnagram.close();
+
+        staticMock.close();
     }
 
     @Test
-    public void test_easyBot_twentyMovesIn(){
-        Board twentyMoveBoard = mock(Board.class);
-        mockAnagram = mockStatic(AnagramService.class);
-        mockAnagram.when(() -> AnagramService.isWord(any())).thenReturn(true);
-
-        tray = "SHADOWI".toCharArray();
-        newBoard.setTray(tray);
+    public void testStart_twentyMovesIn(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
         newBoard.setLetters(setupBoardTwentyMovesIn());
-        aiService.setRandomSeed(2);
 
-        mockAnagram.when(() -> AnagramService.getAllList(anyString(), anyString(), anyInt())).thenReturn(Arrays.asList("SHADOW"));
-        newBoard = AIService.start(System.currentTimeMillis(), newBoard);
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
 
         when(request.getLayout()).thenReturn(newBoard.getLetters());
-        when(mockRepo.findBoardByID(any())).thenReturn(twentyMoveBoard);
-        when(twentyMoveBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
-        when(twentyMoveBoard.getTray()).thenReturn(newBoard.getTray());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
 
         boardService.validateMove(request);
-        mockAnagram.close();
+
+        staticMock.close();
     }
 
     @Test
-    void test_easyBot_fireball(){
-        Board twentyMoveBoard = mock(Board.class);
-        mockAnagram = mockStatic(AnagramService.class);
-        mockAnagram.when(() -> AnagramService.isWord(any())).thenReturn(true);
+    public void testStart_forceFailToFindWord(){
+        newBoard.setTray(new char[7]);
+        newBoard.setLetters(setupBoardTwentyMovesIn());
 
-        tray = "TESTING".toCharArray();
-        newBoard.setTray(tray);
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
+    }
+
+    @Test
+    public void testStart_forceFailToFindWord_shootFireBall(){
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
+
         newBoard.setLetters(setupBoardTwentyMovesIn());
         newBoard.addFireballs(3);
-        aiService.setRandomSeed(3);
 
-        mockAnagram.when(() -> AnagramService.getAllList(anyString(), anyString(), anyInt())).thenReturn(Arrays.asList("TESTING"));
-        newBoard = AIService.start(System.currentTimeMillis(), newBoard);
-
+        aiService.setRandomSeed(0);
+        aiService.start(System.currentTimeMillis(), newBoard);
 
         when(request.getLayout()).thenReturn(newBoard.getLetters());
-        when(mockRepo.findBoardByID(any())).thenReturn(twentyMoveBoard);
-        when(twentyMoveBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
 
         boardService.validateMove(request);
-        mockAnagram.close();
+
+        staticMock.close();
     }
 
     @Test
-    void test_easyBot_forceNoMove(){
-        Board twentyMoveBoard = mock(Board.class);
-        mockAnagram = mockStatic(AnagramService.class);
-        mockAnagram.when(() -> AnagramService.isWord(any())).thenReturn(true);
+    public void testStart_forceFireBall() {
+        MockedStatic<BoardService> staticMock = mockStatic(BoardService.class, CALLS_REAL_METHODS);
 
-        tray = "GGGGGGG".toCharArray();
-        newBoard.setTray(tray);
-        newBoard.setLetters(setupBoardTwentyMovesIn());
+        newBoard.setLetters(setupBlankBoard());
+        newBoard.addFireballs(3);
+
         aiService.setRandomSeed(3);
-
-        mockAnagram.when(() -> AnagramService.getAllList(anyString(), anyString(), anyInt())).thenReturn(Arrays.asList(""));
-        newBoard = AIService.start(System.currentTimeMillis(), newBoard);
-
+        aiService.start(System.currentTimeMillis(), newBoard);
 
         when(request.getLayout()).thenReturn(newBoard.getLetters());
-        when(mockRepo.findBoardByID(any())).thenReturn(twentyMoveBoard);
-        when(twentyMoveBoard.getLetters()).thenReturn(setupBoardTwentyMovesIn());
-        when(twentyMoveBoard.getTray()).thenReturn(newBoard.getTray());
+        when(request.getBoardID()).thenReturn(newBoard.getId());
+        when(mockBoard.getLetters()).thenReturn(setupBlankBoard());
+        staticMock.when(() -> BoardService.getByID(request.getBoardID())).thenReturn(mockBoard);
+        staticMock.when(() -> BoardService.validateMove(request)).thenCallRealMethod();
 
-        //boardService.validateMove(request);
-        mockAnagram.close();
+        boardService.validateMove(request);
+
+        staticMock.close();
     }
 }

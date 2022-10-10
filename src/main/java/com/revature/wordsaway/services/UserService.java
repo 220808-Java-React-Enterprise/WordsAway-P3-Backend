@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.dtos.requests.LoginRequest;
 import com.revature.wordsaway.dtos.requests.NewUserRequest;
+import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
@@ -10,6 +11,7 @@ import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.UserRepository;
 import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
+import com.revature.wordsaway.utils.customExceptions.NotFoundException;
 import com.revature.wordsaway.utils.customExceptions.ResourceConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -205,5 +207,57 @@ public class UserService {
             }
         }
         return friendsList;
+    }
+
+    public static List<UserResponse> getTopTenByElo() {
+        List<User> userList = userRepository.getTopTenInElo();
+        List<UserResponse> topTenList = new ArrayList<>();
+
+        for(User user: userList){
+            topTenList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
+        }
+
+        return topTenList;
+    }
+
+    public static List<UserResponse> getRankingsByELO() {
+
+        List<User> userList = userRepository.getAllOrderByElo();
+        List<UserResponse> rankingsList = new ArrayList<>();
+
+        for(User user: userList){
+            rankingsList.add(new UserResponse(user.getUsername(), user.getELO(), user.getGamesPlayed(), user.getGamesWon(), user.getAvatar()));
+        }
+
+        return rankingsList;
+    }
+
+    public static int getRankByElo(String username, List<UserResponse> rankingList) {
+
+        for(UserResponse user: rankingList){
+            //added one so the rank can be displayed as is.
+            if(user.getUsername().equals(username)){ return rankingList.indexOf(user) + 1; }
+        }
+
+        throw new NotFoundException("Username not found in the rankings list. Please refresh and try again. If problem persists please contact us.");
+    }
+
+    public static void settingsUpdateUser(String username, UpdateUserRequest request){
+
+        User user = userRepository.findUserByUsername(username);
+
+        if(request.getCurrentPassword().equals(user.getPassword())){
+            if (request.getNewPassword() != null && !request.getNewPassword().equals("")) user.setPassword(request.getNewPassword());
+            if (request.getEmail() != null && !request.getEmail().equals("")) {
+                validateEmail(request.getEmail());
+                checkAvailableEmail(request.getEmail());
+                user.setEmail(request.getEmail());
+            }
+            if (request.getAvatarIdx() != user.getAvatar())
+                user.setAvatar(request.getAvatarIdx());
+
+            userRepository.save(user);
+        }
+        else { throw new AuthenticationException("Incorrect password."); }
     }
 }

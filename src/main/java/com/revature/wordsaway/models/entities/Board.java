@@ -1,8 +1,6 @@
 package com.revature.wordsaway.models.entities;
 
-import com.revature.wordsaway.models.GameState;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
-import org.hibernate.annotations.GenericGenerator;
+import com.revature.wordsaway.models.enums.GameState;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -31,7 +29,7 @@ public class Board implements Cloneable{
     private char[] letters;
     @Column(name = "game_id", nullable = false)
     private UUID gameID;
-    @Column(name = "gameState", nullable = false)
+    @Column(name = "game_state", nullable = false)
     private GameState gameState;
     @Column(name = "completed")
     private Timestamp completed;
@@ -40,9 +38,13 @@ public class Board implements Cloneable{
     @Transient
     private char[][] lettersColumns;
 
+    //Delg v2
+    @Column(name = "type")
+    private String type;
+
     protected Board(){}
 
-    public Board(UUID id, User user, char[] tray, int fireballs, char[] worms, char[] letters, UUID gameID, GameState gameState, Timestamp completed) {
+    public Board(UUID id, User user, char[] tray, int fireballs, char[] worms, char[] letters, UUID gameID, GameState gameState, Timestamp completed, String type) {
         this.id = id;
         this.user = user;
         this.tray = tray;
@@ -52,6 +54,7 @@ public class Board implements Cloneable{
         this.gameID = gameID;
         this.gameState = gameState;
         this.completed = completed;
+        this.type = type;
     }
 
     @Override
@@ -162,6 +165,11 @@ public class Board implements Cloneable{
         if (gameState == GameState.YOUR_TURN) gameState = GameState.OPPONENTS_TURN;
         else if (gameState == GameState.OPPONENTS_TURN) gameState = GameState.YOUR_TURN;
         else throw new RuntimeException("Can't toggle turns of game that has ended.");
+    }
+
+    //Delg v2
+    public String getType() {
+        return type;
     }
 
     @Override
