@@ -8,6 +8,7 @@ import com.revature.wordsaway.repositories.BoardRepository;
 import com.revature.wordsaway.repositories.ChatRepository;
 import com.revature.wordsaway.repositories.MessageRepository;
 import com.revature.wordsaway.repositories.UserRepository;
+import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,14 +37,18 @@ class ChatServiceTest {
 
     @BeforeEach
     public void setup() {
+
         mockChatRepository = mock(ChatRepository.class);
         mockMessageRepository = mock(MessageRepository.class);
         chatService = new ChatService(mockChatRepository, mockMessageRepository);
 
         user = new User("chuong@gmail.com", "password", "salt", "chuong@gmail.com", 3, 3.2f, 10, 10, true, new HashSet<>());
-        chat = new Chat(UUID.randomUUID(), new ArrayList<Message>(), new HashSet<>());
         this.timeStamp = new Timestamp(System.currentTimeMillis());
         message = new Message(UUID.randomUUID(), user,timeStamp, "Hello World!", chat);
+
+        List<Message> messageList = new ArrayList<>();
+        messageList.add(message);
+        chat = new Chat(UUID.randomUUID(), messageList, new HashSet<>());
 
 //        mockUserRepo = mock(UserRepository.class);
 //        mockBoardRepo = mock(BoardRepository.class);
@@ -90,14 +95,28 @@ class ChatServiceTest {
     }
 
     @Test
-    void delete() {
+    void test_delete_and_verify_mockChatRepository() {
+        //chatRepository.delete(chat);
+        doNothing().when(mockChatRepository).delete(chat);
+        chatService.delete(chat);
+        verify(mockChatRepository, times(1)).delete(chat);
     }
 
     @Test
-    void getByID() {
+    void test_getByID() {
+        // chatRepository.findByID(id);
+        UUID uid = UUID.randomUUID();
+        when(mockChatRepository.findByID(uid)).thenReturn(chat);
+        Chat c = chatService.getByID(uid);
+        assertEquals(1, c.getMessages().size());
     }
 
     @Test
     void getChatsByUsername() {
+        List<Chat> chatList = new ArrayList<>();
+        chatList.add(chat);
+        when(mockChatRepository.findByUsername("chuong@gmail.com")).thenReturn(chatList);
+        List<Chat> cl = chatService.getChatsByUsername("chuong@gmail.com");
+        assertEquals(1, cl.size());
     }
 }
