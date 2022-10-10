@@ -132,9 +132,9 @@ public class UserController {
                 else if (o2.getCompleted() == null) return 1;
                 return o1.getCompleted().compareTo(o2.getCompleted());
             });
-            int end = limit == null ? boards.size() : limit;
+            int end = limit == null ? boards.size() : (limit < boards.size() ? limit : boards.size());
             List<GameHistoryResponse> gameHistories = new ArrayList<>();
-            for(int i = 0; i < end; i++){
+            for(int i = 0; i < boards.size() && gameHistories.size() <= end; i++){
                 if(boards.get(i).getCompleted() != null) {
                     User opponent = BoardService.getOpposingBoard(boards.get(i)).getUser();
                     gameHistories.add(new GameHistoryResponse(
