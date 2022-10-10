@@ -6,6 +6,7 @@ import com.revature.wordsaway.dtos.responses.GameResponse;
 import com.revature.wordsaway.dtos.responses.OpponentResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
+import com.revature.wordsaway.models.enums.GameState;
 import com.revature.wordsaway.services.AIService;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
@@ -26,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,13 +135,20 @@ public class GameController {
             BoardService.makeMove(request, board);
             Board opposingBoard = BoardService.getOpposingBoard(board);
             User opponent = opposingBoard.getUser();
-            if (BoardService.gameOver(request.getBoardID()) && board.getType().toUpperCase().equals("RANKED")){
-                user.setELO(BoardService.calculateELO(user.getELO(), opponent.getELO(), true));
+            if (BoardService.gameOver(request.getBoardID())){
+                board.setGameState(GameState.WIN);
+                board.setCompleted(Timestamp.from(Instant.now()));
+                if(board.getType().equalsIgnoreCase("RANKED")) user.setELO(BoardService.calculateELO(user.getELO(), opponent.getELO(), true));
                 user.setGamesPlayed(user.getGamesPlayed() + 1);
                 user.setGamesWon(user.getGamesWon() + 1);
                 UserService.update(user);
-                if(!opponent.isCPU()) opponent.setELO(BoardService.calculateELO(opponent.getELO(), user.getELO(), false));
+                BoardService.update(board);
+                if(!opponent.isCPU() && board.getType().equalsIgnoreCase("RANKED"))
+                    opponent.setELO(BoardService.calculateELO(opponent.getELO(), user.getELO(), false));
                 opponent.setGamesPlayed(opponent.getGamesPlayed() + 1);
+                opposingBoard.setGameState(GameState.LOSE);
+                opposingBoard.setCompleted(Timestamp.from(Instant.now()));
+                BoardService.update(opposingBoard);
                 UserService.update(opponent);
             }else if (opponent.isCPU()) {
                 cpuMakeMove(board, opposingBoard);
