@@ -51,13 +51,18 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                         users.remove(user);
                         users.put(user, session);
                         System.out.println("User " + stub.getUser() + " logged in.");
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"LOGIN_ACK\", \"data\":\"\"}"));
                         for (Chat c : ChatService.getChatsByUsername(user.getUsername())) {
                             chats.put(c.getId(), c.getUsers());
-                            session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + c.getId() + "\", \"type\":\"START_CHAT\", \"data\":\"\"}"));
+                            StringBuilder sb = new StringBuilder();
+                            for(User u : c.getUsers()){
+                                sb.append(u.getUsername()).append(", ");
+                            }
+                            sb.delete(sb.length()-2,sb.length());
+                            session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + c.getId() + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"" + sb + "\"}"));
                             for (Message m : c.getMessages()) {
                                 session.sendMessage(new TextMessage("{\"user\":\"" + m.getUser().getUsername() + "\", \"id\":\"" + c.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
                             }
+                            session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"LOGIN_ACK\", \"data\":\"\"}"));
                         }
                     } catch (Exception e) {
                         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
@@ -71,7 +76,6 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                         User user = UserService.getByUsername(stub.user);
                         chats.get(id).add(user);
                         chat.getUsers().add(user);
-                        if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                         if (!stub.getData().matches("\\s*")) {
                             for (String username : stub.getData().split(",")) {
                                 user = UserService.getByUsername(username);
@@ -81,8 +85,13 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                             }
                         }
                         ChatService.register(chat);
+                        StringBuilder sb = new StringBuilder();
+                        for(User u : chats.get(id)){
+                            sb.append(u.getUsername()).append(", ");
+                        }
+                        sb.delete(sb.length()-2,sb.length());
+                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"" + sb + "\"}"));
                         System.out.println("Chat Started with id: " + id + " and users: " + chats.get(id));
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                     } catch (Exception e) {
                         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
                     }
@@ -93,13 +102,18 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                     try {
                         User user = UserService.getByUsername(stub.user);
                         chats.get(id).add(user);
-                        users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
+                        //users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                         chat.getUsers().add(user);
+                        StringBuilder sb = new StringBuilder();
+                        for(User u : chats.get(id)){
+                            sb.append(u.getUsername()).append(", ");
+                        }
+                        sb.delete(sb.length()-2,sb.length());
                         for (String username : stub.getData().split(",")) {
                             user = UserService.getByUsername(username);
                             chats.get(id).add(user);
                             chat.getUsers().add(user);
-                            if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
+                            if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"" + sb + "\"}"));
                             for (Message m : chat.getMessages()) {
                                 if (users.containsKey(user))
                                     users.get(user).sendMessage(new TextMessage("{\"user\":\"" + m.getUser().getUsername() + "\", \"id\":\"" + chat.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
@@ -107,7 +121,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                         }
                         ChatService.update(chat);
                         System.out.println("Users Added to Chat " + id + ": " + chats.get(id));
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"ADD_USER_ACK\", \"data\":\"" + chats.get(id) + "\"}"));
+                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"ADD_USER_ACK\", \"data\":\"" + stub.getData() + "\"}"));
                     } catch (NetworkException e) {
                         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
                     }
@@ -115,6 +129,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                 }case "MESSAGE": {
                     try {
                         UUID id = UUID.fromString(stub.getID());
+                        User user = UserService.getByUsername(stub.getUser());
                         Chat chat = ChatService.getByID(id);
                         Message message = new Message(
                                 UUID.randomUUID(),
@@ -126,7 +141,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                         ChatService.addMessage(chat, message);
                         System.out.println("Message Received: " + message.getMessage() + " from: " + message.getUser().getUsername() + " to: " + chats.get(id));
                         for (User u : chats.get(id)) {
-                            if (users.containsKey(u))
+                            if (!u.equals(user) && users.containsKey(u))
                                 users.get(u).sendMessage(new TextMessage("{\"user\":\"" + stub.getUser() + "\", \"id\":\"" + stub.getID() + "\", \"type\":\"MESSAGE\", \"data\":\"" + stub.getData() + "\"}"));
                         }
                     } catch (Exception e) {
@@ -148,7 +163,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                             ChatService.update(chat);
                         }
                         System.out.println("Users Left the Chat " + id + ": " + stub.getUser());
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"LEAVE_CHAT_ACK\", \"data\":\"\"}"));
+                        //session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"LEAVE_CHAT_ACK\", \"data\":\"\"}"));
                     } catch (Exception e) {
                         session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
                     }
