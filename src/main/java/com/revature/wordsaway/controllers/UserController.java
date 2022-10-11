@@ -119,7 +119,7 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/gameHistory", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody String getGameHistory (@RequestParam(required = false) String username, @RequestParam(required = false) Integer limit, HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody List<GameHistoryResponse> getGameHistory (@RequestParam(required = false) String username, @RequestParam(required = false) Integer limit, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
             List<Board> boards = BoardService.getAllByUsername(username != null ? username : user.getUsername());
@@ -147,11 +147,11 @@ public class UserController {
                             boards.get(i).getGameState()));
                 }
             }
-            return gameHistories.toString();
+            return gameHistories;
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
-            return new ArrayList<Board>().toString();
+            return new ArrayList<>();
         }
     }
 
