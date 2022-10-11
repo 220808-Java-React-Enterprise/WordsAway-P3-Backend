@@ -71,10 +71,12 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                         User user = UserService.getByUsername(stub.user);
                         chats.get(id).add(user);
                         chat.getUsers().add(user);
+                        if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                         if (!stub.getData().matches("\\s*")) {
                             for (String username : stub.getData().split(",")) {
                                 user = UserService.getByUsername(username);
                                 chats.get(id).add(user);
+                                if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                                 chat.getUsers().add(user);
                             }
                         }
@@ -91,11 +93,17 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                     try {
                         User user = UserService.getByUsername(stub.user);
                         chats.get(id).add(user);
+                        users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
                         chat.getUsers().add(user);
                         for (String username : stub.getData().split(",")) {
                             user = UserService.getByUsername(username);
                             chats.get(id).add(user);
                             chat.getUsers().add(user);
+                            if (users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
+                            for (Message m : chat.getMessages()) {
+                                if (users.containsKey(user))
+                                    users.get(user).sendMessage(new TextMessage("{\"user\":\"" + m.getUser().getUsername() + "\", \"id\":\"" + chat.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
+                            }
                         }
                         ChatService.update(chat);
                         System.out.println("Users Added to Chat " + id + ": " + chats.get(id));

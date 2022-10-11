@@ -8,8 +8,6 @@ import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
-import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
