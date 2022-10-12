@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ChatMessageHandler extends TextWebSocketHandler {
@@ -79,6 +80,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
                     addMessageToChat(chat, user, message);
                     sendMessageToOthersInChat(chat, user,"SERVER", message);
                     addUserToChat(chat, userToAdd);
+                    chat = ChatService.getByID(UUID.fromString(stub.getID())); //TODO hacky
                     message = userToAdd.getUsername() + " joined the chat.";
                     addMessageToChat(chat, user, message);
                     sendMessageToChat(chat, "SERVER", message);
@@ -171,13 +173,13 @@ public class ChatMessageHandler extends TextWebSocketHandler {
 
     private void sendChatToUser(Chat chat, User user) throws IOException{
         sendMessageToUser(user, "SERVER", chat.getId(), MessageType.START_CHAT_ACK, "");
-        for(Message message : chat.getMessages()){
-            sendMessageToUser(user, message.getUser().getUsername(), message.getId(), MessageType.MESSAGE, message.getMessage());
+        for(Message message : chat.getMessages().stream().sorted(Comparator.comparing(Message::getCreated)).collect(Collectors.toList())){
+            sendMessageToUser(user, message.getUser().getUsername(), chat.getId(), MessageType.MESSAGE, message.getMessage());
         }
     }
 
     private void addMessageToChat(Chat chat, User from, String text) throws IOException{
-        Message message = new Message(chat.getId(), from, Timestamp.from(Instant.now()), text, chat);
+        Message message = new Message(UUID.randomUUID(), from, Timestamp.from(Instant.now()), text, chat);
         chat.addMessage(message);
         ChatService.addMessage(message);
     }

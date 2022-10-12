@@ -17,7 +17,7 @@ public class Message {
     @Column(name = "message", nullable = false)
     private String message;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name="chat", referencedColumnName = "id")
     Chat chat;
 
