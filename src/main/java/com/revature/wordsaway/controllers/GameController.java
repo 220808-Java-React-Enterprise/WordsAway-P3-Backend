@@ -57,7 +57,6 @@ public class GameController {
                 if(o.getUsername().equals(opponent.getUsername()) && o.getBoard_id() != null)
                     throw new InvalidRequestException("Can not start another match with "+ opponent.getUsername() + ". Finish existing game first.");
             }
-
             if(type == null) type = "PRACTICE";
             UUID uuid = UUID.randomUUID();
             BoardService.register(opponent, uuid, !opponent.isCPU(), type.toUpperCase());
@@ -65,6 +64,13 @@ public class GameController {
             return board.getId().toString();
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            return e.getMessage();
+        }catch(IOException e){
+            resp.setStatus(500);
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             return e.getMessage();
         }
     }

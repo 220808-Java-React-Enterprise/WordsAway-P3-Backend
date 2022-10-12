@@ -38,9 +38,27 @@ public class Chat {
         return messages;
     }
 
+    public void addMessage(Message message){
+        messages.add(message);
+    }
+
     @Getter
     public Set<User> getUsers() {
         return users;
+    }
+
+    public void addUser(User user){
+        users.add(user);
+    }
+
+    public String getUsernameList(){
+        StringBuilder sb = new StringBuilder();
+        if(users.size() < 1) return "";
+        for(User user : users){
+            sb.append(user.getUsername()).append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        return sb.toString();
     }
 
     @Override
