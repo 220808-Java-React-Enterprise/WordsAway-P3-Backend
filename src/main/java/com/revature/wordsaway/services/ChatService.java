@@ -2,6 +2,7 @@ package com.revature.wordsaway.services;
 
 import com.revature.wordsaway.models.entities.Chat;
 import com.revature.wordsaway.models.entities.Message;
+import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.repositories.ChatRepository;
 import com.revature.wordsaway.repositories.MessageRepository;
 import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
@@ -34,11 +35,26 @@ public class ChatService {
         messageRepository.save(message);
     }
 
+    public static void addMessage(Message message){
+        messageRepository.save(message);
+    }
+
     public static void update(Chat chat){
         chatRepository.save(chat);
     }
 
+//    public static void addUser(User user, Chat chat){
+//        chatRepository.addUser(user.getUsername(), chat.getId().toString());
+//    }
+//
+//    public static void removeUser(User user, Chat chat){
+//        chatRepository.addUser(user.getUsername(), chat.getId().toString());
+//    }
+
     public static void delete(Chat chat){
+        for(Message message : chat.getMessages()){
+            messageRepository.delete(message);
+        }
         chatRepository.delete(chat);
     }
 
