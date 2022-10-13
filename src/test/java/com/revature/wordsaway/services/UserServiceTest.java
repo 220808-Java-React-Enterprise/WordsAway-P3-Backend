@@ -388,10 +388,10 @@ class UserServiceTest {
         UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(mockBoard.getId()).thenReturn(uuid);
         when(mockBoard.getUser()).thenReturn(mockUser);
-        when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
+        when(mockBoardRepo.findUnfinishedBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
-        verify(mockBoardRepo, times(1)).findBoardsByTwoUsernames(any(), any());
+        verify(mockBoardRepo, times(1)).findUnfinishedBoardsByTwoUsernames(any(), any());
         assertNotNull(opponents);
         assertEquals(opponents.size(), 1);
         assertEquals(opponents.get(0).getUsername(), "username");
@@ -404,7 +404,7 @@ class UserServiceTest {
         when(mockUserRepo.findAllOtherUsers(any())).thenReturn(new ArrayList<>());
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
-        verify(mockBoardRepo, times(0)).findBoardsByTwoUsernames(any(), any());
+        verify(mockBoardRepo, times(0)).findUnfinishedBoardsByTwoUsernames(any(), any());
         assertNotNull(opponents);
         assertEquals(opponents.size(), 0);
     }
@@ -414,10 +414,10 @@ class UserServiceTest {
         when(mockUserRepo.findAllOtherUsers(any())).thenReturn(Arrays.asList(mockUser));
         when(mockUser.getUsername()).thenReturn("username");
         when(mockUser.getELO()).thenReturn(1000F);
-        when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(new ArrayList<>());
+        when(mockBoardRepo.findUnfinishedBoardsByTwoUsernames(any(), any())).thenReturn(new ArrayList<>());
         List<OpponentResponse> opponents = userService.getAllOpponents("username");
         verify(mockUserRepo, times(1)).findAllOtherUsers(any());
-        verify(mockBoardRepo, times(1)).findBoardsByTwoUsernames(any(), any());
+        verify(mockBoardRepo, times(1)).findUnfinishedBoardsByTwoUsernames(any(), any());
         assertNotNull(opponents);
         assertEquals(opponents.size(), 1);
         assertEquals(opponents.get(0).getUsername(), "username");
@@ -433,10 +433,10 @@ class UserServiceTest {
         UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
         when(mockBoard.getId()).thenReturn(uuid);
         when(mockBoard.getUser()).thenReturn(mockUser);
-        when(mockBoardRepo.findBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
+        when(mockBoardRepo.findUnfinishedBoardsByTwoUsernames(any(), any())).thenReturn(Arrays.asList(mockBoard));
         List<OpponentResponse> opponents = userService.getAllOpponents("username", true);
         verify(mockUserRepo, times(1)).findAllOtherUsers("username", true);
-        verify(mockBoardRepo, times(1)).findBoardsByTwoUsernames(any(), any());
+        verify(mockBoardRepo, times(1)).findUnfinishedBoardsByTwoUsernames(any(), any());
         assertNotNull(opponents);
         assertEquals(opponents.size(), 1);
         assertEquals(opponents.get(0).getUsername(), "username");
