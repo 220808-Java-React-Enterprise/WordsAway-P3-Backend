@@ -184,7 +184,7 @@ public class Board implements Cloneable{
     public String toString() {
         return "Board{" +
                 "id=" + id +
-                ", user=" + user +
+                ", user=" + user.getUsername() +
                 ", tray=" + Arrays.toString(tray) +
                 ", fireballs=" + fireballs +
                 ", worms=" + Arrays.toString(worms) +

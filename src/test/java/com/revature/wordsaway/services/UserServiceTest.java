@@ -59,6 +59,18 @@ class UserServiceTest {
     }
 
     @Test
+    public void test_getFriendsList_findAllUserWhoFriendUser() {
+        Map<String, List<UserResponse>> friendsList = new HashMap<>();
+        List<String> friend_nameList = new ArrayList<>();
+        friend_nameList.add("marypublic");
+
+        when(mockUserRepo.findAllUserWhoFriendUser(any())).thenReturn(friend_nameList);
+        List<String> myFriendList = mockUserRepo.findAllUserWhoFriendUser(any());
+        assertEquals(1, myFriendList.size());
+
+    }
+
+    @Test
     public void test_register_WithNullEmail_succeed(){
         when(mockRequest.getEmail()).thenReturn(null);
         when(mockUserRepo.findUserByUsername(any())).thenReturn(null);

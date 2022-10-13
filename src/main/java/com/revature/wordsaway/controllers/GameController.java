@@ -57,7 +57,6 @@ public class GameController {
                 if(o.getUsername().equals(opponent.getUsername()) && o.getBoard_id() != null)
                     throw new InvalidRequestException("Can not start another match with "+ opponent.getUsername() + ". Finish existing game first.");
             }
-
             if(type == null) type = "PRACTICE";
             UUID uuid = UUID.randomUUID();
             BoardService.register(opponent, uuid, !opponent.isCPU(), type.toUpperCase());
@@ -65,6 +64,13 @@ public class GameController {
             return board.getId().toString();
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            return e.getMessage();
+        }catch(IOException e){
+            resp.setStatus(500);
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             return e.getMessage();
         }
     }
@@ -162,7 +168,7 @@ public class GameController {
             }else{
                 //TODO find less hacky way to do this
                 ChatMessageHandler wsHandler = ((WebSocketConfig) appContext.getBean("webSocketConfig")).handler;
-                wsHandler.sendNotification(opponent, user + " has made their move.");
+                wsHandler.sendNotification(opponent, user.getUsername() + " has made their move.");
             }
             return "Move made.";
         }catch (NetworkException e){
@@ -222,7 +228,7 @@ public class GameController {
             if(!BoardService.gameOver(opposingBoard.getId()) && !BoardService.gameOver(board.getId()))
                 throw new InvalidRequestException("You can not end a game that is still in progress.");
             //TODO possibly allow for surrendering.
-            BoardService.endGame(board.getGameID());
+            //BoardService.endGame(board.getGameID());
             return "Game Ended";
         }catch(NetworkException e){
             resp.setStatus(e.getStatusCode());

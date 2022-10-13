@@ -164,7 +164,13 @@ public class UserService {
         friendsList.put("friends",  new ArrayList<>());
         friendsList.put("incomingRequests",  new ArrayList<>());
         friendsList.put("outgoingRequests",  new ArrayList<>());
+
+        // all records of column friend_name
+        // all friends of current user (friends that user accepted as friend)
         List<String> myFriends = userRepository.findAllFriends(username);
+
+        // all records of column username
+        // return friends(friends that accepted user as a friend)
         List<String> peopleWhoFriendMe = userRepository.findAllUserWhoFriendUser(username);
         for(String name: myFriends) {
             User friendAccount = getByUsername(name);

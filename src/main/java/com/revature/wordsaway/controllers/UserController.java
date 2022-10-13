@@ -1,23 +1,19 @@
 package com.revature.wordsaway.controllers;
 
 import com.revature.wordsaway.dtos.requests.UpdateUserRequest;
+import com.revature.wordsaway.dtos.responses.GameHistoryResponse;
 import com.revature.wordsaway.dtos.responses.UserResponse;
 import com.revature.wordsaway.models.entities.Board;
 import com.revature.wordsaway.models.entities.User;
 import com.revature.wordsaway.services.BoardService;
 import com.revature.wordsaway.services.TokenService;
 import com.revature.wordsaway.services.UserService;
-import com.revature.wordsaway.utils.customExceptions.AuthenticationException;
-import com.revature.wordsaway.utils.customExceptions.InvalidRequestException;
 import com.revature.wordsaway.utils.customExceptions.NetworkException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping
@@ -123,14 +119,39 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/gameHistory", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody List<Board> getGameHistory (@RequestParam(required = false) String username, HttpServletRequest req, HttpServletResponse resp) {
+    public @ResponseBody List<GameHistoryResponse> getGameHistory (@RequestParam(required = false) String username, @RequestParam(required = false) Integer limit, HttpServletRequest req, HttpServletResponse resp) {
         try {
             User user = TokenService.extractRequesterDetails(req);
-            return BoardService.getAllByUsername(username != null ? username : user.getUsername());
+            List<Board> boards = BoardService.getAllByUsername(username != null ? username : user.getUsername());
+            boards.sort((o1, o2) -> {
+                if (o1.getCompleted() == null && o2.getCompleted() == null) {
+                    return 0;
+                } else if (o1.getCompleted() == null) return -1;
+                else if (o2.getCompleted() == null) return 1;
+                return o1.getCompleted().compareTo(o2.getCompleted());
+            });
+            int end = limit == null ? boards.size() : (limit < boards.size() ? limit : boards.size());
+            List<GameHistoryResponse> gameHistories = new ArrayList<>();
+            for(int i = 0; i < boards.size() && gameHistories.size() <= end; i++){
+                if(boards.get(i).getCompleted() != null) {
+                    User opponent = BoardService.getOpposingBoard(boards.get(i)).getUser();
+                    gameHistories.add(new GameHistoryResponse(
+                            boards.get(i).getId(),
+                            new UserResponse(
+                                    opponent.getUsername(),
+                                    opponent.getELO(),
+                                    opponent.getGamesPlayed(),
+                                    opponent.getGamesWon(),
+                                    opponent.getAvatar()
+                            ),
+                            boards.get(i).getGameState()));
+                }
+            }
+            return gameHistories;
         }catch (NetworkException e){
             resp.setStatus(e.getStatusCode());
             System.out.println(e.getMessage());
-            return new ArrayList<Board>();
+            return new ArrayList<>();
         }
     }
 

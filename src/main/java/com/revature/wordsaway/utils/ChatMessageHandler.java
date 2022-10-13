@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.wordsaway.models.entities.Chat;
 import com.revature.wordsaway.models.entities.Message;
 import com.revature.wordsaway.models.entities.User;
+import com.revature.wordsaway.models.enums.MessageType;
 import com.revature.wordsaway.services.ChatService;
 import com.revature.wordsaway.services.UserService;
-import com.revature.wordsaway.utils.customExceptions.NetworkException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ChatMessageHandler extends TextWebSocketHandler {
     private final HashMap<User, WebSocketSession> users = new HashMap<>();
-    private final HashMap<UUID, Set<User>> chats = new HashMap<>();
     private final List<WebSocketSession> webSocketSessions = Collections.synchronizedList(new ArrayList<>());
 
     @Override
@@ -36,6 +36,11 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
         webSocketSessions.remove(session);
+        for (Map.Entry<User, WebSocketSession> entry : users.entrySet()) {
+            if (Objects.equals(session, entry.getValue())) {
+                users.remove(entry.getKey());
+            }
+        }
         System.out.println("Closed connection to " + session.getRemoteAddress());
     }
 
@@ -46,112 +51,65 @@ public class ChatMessageHandler extends TextWebSocketHandler {
             MessageStub stub = new ObjectMapper().readValue((String) webSocketMessage.getPayload(), MessageStub.class);
             switch (stub.getType()){
                 case "LOGIN": {
-                    try {
-                        User user = UserService.getByUsername(stub.getUser());
-                        users.remove(user);
-                        users.put(user, session);
-                        System.out.println("User " + stub.getUser() + " logged in.");
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"LOGIN_ACK\", \"data\":\"\"}"));
-                        for (Chat c : ChatService.getChatsByUsername(user.getUsername())) {
-                            chats.put(c.getId(), c.getUsers());
-                            session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + c.getId() + "\", \"type\":\"START_CHAT\", \"data\":\"\"}"));
-                            for (Message m : c.getMessages()) {
-                                session.sendMessage(new TextMessage("{\"user\":\"" + m.getUser().getUsername() + "\", \"id\":\"" + c.getId() + "\", \"type\":\"MESSAGE\", \"data\":\"" + m.getMessage() + "\"}"));
-                            }
-                        }
-                    } catch (Exception e) {
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
+                    if(stub.getUser() == null || stub.getUser().equals("")) {
+                        session.close();
+                        return;
                     }
+                    User user = UserService.getByUsername(stub.getUser());
+                    users.remove(user);
+                    users.put(user, session);
+                    sendChatsToUser(ChatService.getChatsByUsername(user.getUsername()), user);
+                    System.out.println("User " + stub.getUser() + " logged in.");
                     break;
                 }case "START_CHAT": {
-                    UUID id = UUID.randomUUID();
-                    Chat chat = new Chat(id, new ArrayList<>(), new HashSet<>());
-                    chats.put(id, new HashSet<>());
-                    try {
-                        User user = UserService.getByUsername(stub.user);
-                        chats.get(id).add(user);
-                        chat.getUsers().add(user);
-                        if (!stub.getData().matches("\\s*")) {
-                            for (String username : stub.getData().split(",")) {
-                                user = UserService.getByUsername(username);
-                                chats.get(id).add(user);
-                                chat.getUsers().add(user);
-                            }
-                        }
-                        ChatService.register(chat);
-                        System.out.println("Chat Started with id: " + id + " and users: " + chats.get(id));
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"START_CHAT_ACK\", \"data\":\"\"}"));
-                    } catch (Exception e) {
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
-                    }
+                    Chat chat = new Chat(UUID.randomUUID(), new ArrayList<>(), new HashSet<>());
+                    ChatService.register(chat);
+                    User user = UserService.getByUsername(stub.user);
+                    addUserToChat(chat, user);
+                    if (!stub.getData().matches("\\s*")) addUsersToChat(chat, stub.getData().split(","));
+                    String message = "Chat started with users: " + chat.getUsernameList();
+                    addMessageToChat(chat, user, message);
+                    sendMessageToChat(chat, "SERVER", message);
+                    System.out.println("Chat Started with id: " + chat.getId() + " and users: " + chat.getUsernameList());
                     break;
                 }case "ADD_USER": {
-                    UUID id = UUID.fromString(stub.getID());
-                    Chat chat = ChatService.getByID(id);
-                    try {
-                        User user = UserService.getByUsername(stub.user);
-                        chats.get(id).add(user);
-                        chat.getUsers().add(user);
-                        for (String username : stub.getData().split(",")) {
-                            user = UserService.getByUsername(username);
-                            chats.get(id).add(user);
-                            chat.getUsers().add(user);
-                        }
-                        ChatService.update(chat);
-                        System.out.println("Users Added to Chat " + id + ": " + chats.get(id));
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"ADD_USER_ACK\", \"data\":\"" + chats.get(id) + "\"}"));
-                    } catch (NetworkException e) {
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
-                    }
+                    Chat chat = ChatService.getByID(UUID.fromString(stub.getID()));
+                    User user = UserService.getByUsername(stub.user);
+                    User userToAdd = UserService.getByUsername(stub.data);
+                    String message = user.getUsername() + " requested " + userToAdd.getUsername() + " join the chat.";
+                    addMessageToChat(chat, user, message);
+                    sendMessageToOthersInChat(chat, user,"SERVER", message);
+                    addUserToChat(chat, userToAdd);
+                    chat = ChatService.getByID(UUID.fromString(stub.getID())); //TODO hacky
+                    message = userToAdd.getUsername() + " joined the chat.";
+                    addMessageToChat(chat, user, message);
+                    sendMessageToChat(chat, "SERVER", message);
+                    System.out.println("Users Added to Chat " + chat.getId() + ": " + userToAdd.getUsername());
                     break;
                 }case "MESSAGE": {
-                    try {
-                        UUID id = UUID.fromString(stub.getID());
-                        Chat chat = ChatService.getByID(id);
-                        Message message = new Message(
-                                UUID.randomUUID(),
-                                UserService.getByUsername(stub.getUser()),
-                                Timestamp.from(Instant.now()),
-                                stub.getData(),
-                                chat
-                        );
-                        ChatService.addMessage(chat, message);
-                        System.out.println("Message Received: " + message.getMessage() + " from: " + message.getUser().getUsername() + " to: " + chats.get(id));
-                        for (User u : chats.get(id)) {
-                            if (users.containsKey(u))
-                                users.get(u).sendMessage(new TextMessage("{\"user\":\"" + stub.getUser() + "\", \"id\":\"" + stub.getID() + "\", \"type\":\"MESSAGE\", \"data\":\"" + stub.getData() + "\"}"));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
-                    }
+                    Chat chat = ChatService.getByID(UUID.fromString(stub.getID()));
+                    User user = UserService.getByUsername(stub.getUser());
+                    addMessageToChat(chat, user, stub.getData());
+                    sendMessageToOthersInChat(chat, user, user.getUsername(), stub.getData());
+                    System.out.println("Message received: \"" + stub.getData() + "\" from " + user.getUsername());
                     break;
                 }case "LEAVE_CHAT": {
-                    try {
-                        UUID id = UUID.fromString(stub.getID());
-                        Chat chat = ChatService.getByID(id);
-                        User user = UserService.getByUsername(stub.getUser());
-                        chats.get(id).remove(user);
-                        chat.getUsers().remove(user);
-                        if (chats.get(id).isEmpty()) {
-                            chats.remove(id);
-                            ChatService.delete(chat); //TODO make sure this bit works when loading is done.
-                        } else {
-                            ChatService.update(chat);
-                        }
-                        System.out.println("Users Left the Chat " + id + ": " + stub.getUser());
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"" + id + "\", \"type\":\"LEAVE_CHAT_ACK\", \"data\":\"\"}"));
-                    } catch (Exception e) {
-                        session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + e + "\"}"));
-                    }
+                    Chat chat = ChatService.getByID(UUID.fromString(stub.getID()));
+                    User user = UserService.getByUsername(stub.getUser());
+                    String message = user.getUsername() + " left the chat.";
+                    addMessageToChat(chat, user, message);
+                    sendMessageToOthersInChat(chat, user, "SERVER", message);
+                    removeUserFromChat(chat, user);
+                    System.out.println("Users Left the Chat " + stub.getID() + ": " + stub.getUser());
                     break;
                 }default: {
                     System.out.println("Invalid message type: " + stub.getType());
                     session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"Invalid message type: " + stub.getType() + "\"}"));
                 }
             }
-        }catch (IOException e){
-            System.out.println("Incoming message is in incorrect format: " + webSocketMessage.getPayload());
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
             session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"Incoming message is in incorrect format: " + webSocketMessage.getPayload() + "\"}"));
         }
     }
@@ -159,20 +117,75 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         super.handleTransportError(session, exception);
-        //session.sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"ERROR\", \"data\":\"" + exception + "\"}"));
         exception.printStackTrace();
         System.out.println(exception.getMessage());
     }
 
-    public void sendNotification(User user, String message){
-        if(users.containsKey(user)){
-            try {
-                users.get(user).sendMessage(new TextMessage("{\"user\":\"SERVER\", \"id\":\"\", \"type\":\"NOTIFICATION\", \"data\":\"" + message + "\"}"));
-            }catch (IOException e){
-                e.printStackTrace();
-                System.out.println(e.getMessage());
-            }
+    private void addUserToChat(Chat chat, User user) throws IOException{
+        addUsersToChat(chat, Collections.singletonList(user));
+    }
+
+    private void addUsersToChat (Chat chat, String[] usernames) throws IOException{
+        List<User> users = new ArrayList<>();
+        for(String username : usernames){
+            users.add(UserService.getByUsername(username));
         }
+        addUsersToChat(chat, users);
+    }
+
+    private void addUsersToChat (Chat chat, List<User> users) throws IOException{
+        for(User user : users){
+            chat.addUser(user);
+            //ChatService.addUser(user, chat);
+            sendChatToUser(chat, user);
+        }
+        ChatService.update(chat);
+    }
+
+    private void removeUserFromChat(Chat chat, User user){
+        chat.getUsers().remove(user);
+        //ChatService.addUser(user, chat);
+        if(chat.getUsers().isEmpty()) ChatService.delete(chat);
+        else ChatService.update(chat);
+    }
+
+    private void sendMessageToUser(User user, String from, UUID id, MessageType type, String text) throws IOException{
+        if(users.containsKey(user)) users.get(user).sendMessage(new TextMessage("{\"user\":\"" + from + "\", \"id\":\"" + id.toString() + "\", \"type\":\"" + type + "\", \"data\":\"" + text + "\"}"));
+    }
+
+    private void sendMessageToChat(Chat chat, String from, String text) throws IOException{
+        for(User user : chat.getUsers()){
+            sendMessageToUser(user, from, chat.getId(), MessageType.MESSAGE, text);
+        }
+    }
+
+    private void sendMessageToOthersInChat(Chat chat, User excluded, String from, String text) throws IOException{
+        for(User user : chat.getUsers()){
+            if(!user.equals(excluded)) sendMessageToUser(user, from, chat.getId(), MessageType.MESSAGE, text);
+        }
+    }
+
+    private void sendChatsToUser(List<Chat> chats, User user) throws IOException{
+        for(Chat chat : chats){
+            sendChatToUser(chat, user);
+        }
+    }
+
+    private void sendChatToUser(Chat chat, User user) throws IOException{
+        sendMessageToUser(user, "SERVER", chat.getId(), MessageType.START_CHAT_ACK, "");
+        for(Message message : chat.getMessages().stream().sorted(Comparator.comparing(Message::getCreated)).collect(Collectors.toList())){
+            sendMessageToUser(user, message.getUser().getUsername(), chat.getId(), MessageType.MESSAGE, message.getMessage());
+        }
+    }
+
+    private void addMessageToChat(Chat chat, User from, String text) throws IOException{
+        Message message = new Message(UUID.randomUUID(), from, Timestamp.from(Instant.now()), text, chat);
+        chat.addMessage(message);
+        ChatService.addMessage(message);
+    }
+
+    public void sendNotification(User user, String message) throws IOException{
+        sendMessageToUser(user, "SERVER", new UUID(0L, 0L), MessageType.NOTIFICATION, message);
     }
 
     public HashMap<User, WebSocketSession> getUsers(){
