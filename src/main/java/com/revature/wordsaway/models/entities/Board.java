@@ -124,7 +124,7 @@ public class Board implements Cloneable{
     }
 
     public boolean isActive(){
-        return gameState == GameState.YOUR_TURN;
+        return gameState == GameState.YOUR_TURN || gameState == GameState.LOSE || gameState == GameState.WIN;
     }
 
     public Timestamp getCompleted(){
