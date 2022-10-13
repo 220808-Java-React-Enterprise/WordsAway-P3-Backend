@@ -118,7 +118,7 @@ public class UserService {
     public static List<OpponentResponse> getAllOpponents(String username, List<User> users) {
         List<OpponentResponse> results = new ArrayList<>();
         for(User opponent : users){
-            List<Board> boards = boardRepository.findBoardsByTwoUsernames(username, opponent.getUsername());
+            List<Board> boards = boardRepository.findUnfinishedBoardsByTwoUsernames(username, opponent.getUsername());
             UUID boardID;
             if(boards.size() > 0){
                 if(boards.get(0).getUser().getUsername().equals(username)) boardID = boards.get(0).getId();

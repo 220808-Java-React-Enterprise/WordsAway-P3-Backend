@@ -24,8 +24,8 @@ public interface BoardRepository extends CrudRepository<Board, UUID> {
     @Query(value = "SELECT * FROM boards WHERE username = ?1", nativeQuery = true)
     List<Board> findAllBoardsByUsername(String username);
 
-    @Query(value = "SELECT * FROM boards B1, boards B2 WHERE B1.game_id = B2.game_id AND B1.username = ?1 AND B2.username = ?2", nativeQuery = true)
-    List<Board> findBoardsByTwoUsernames(String username1, String username2);
+    @Query(value = "SELECT * FROM boards B1, boards B2 WHERE B1.game_id = B2.game_id AND B1.username = ?1 AND B2.username = ?2 AND B1.completed IS NULL AND B2.completed IS NULL", nativeQuery = true)
+    List<Board> findUnfinishedBoardsByTwoUsernames(String username1, String username2);
 
     @Transactional
     @Modifying
